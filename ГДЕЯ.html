@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ГДЕЯ × Аз×Буки · v1 — офлайн прототип</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #0a0f1c; color: #fef9c3; }
+    .pane { background: rgba(0,0,0,.2); border: 1px solid rgba(250, 204, 21, .2); border-radius: 16px; padding: 16px; }
+    .gold { color: #facc15; }
+    .btn { border-radius: 10px; border: 1px solid rgba(250,204,21,.35); padding: 6px 10px; }
+    .btn:hover { background: rgba(250,204,21,.1); }
+    .chip { display:inline-block; margin:2px; padding:2px 8px; border-radius:8px; background: rgba(250,204,21,.15); border: 1px solid rgba(250,204,21,.3); }
+    .muted { color: rgba(254,249,195,.65); }
+    textarea,input { background: rgba(0,0,0,.3); border: 1px solid rgba(250,204,21,.2); color: #fff; border-radius: 12px; padding: 8px; }
+    ::placeholder { color: rgba(250,204,21,.4); }
+    .grid-cols-auto { display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:8px; }
+  </style>
+</head>
+<body>
+  <header class="sticky top-0 z-20 backdrop-blur bg-[#0a0f1c]/70 border-b border-yellow-200/10">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-2.5 h-2.5 rounded-full bg-yellow-300 shadow-[0_0_18px_rgba(250,204,21,.8)]"></div>
+        <div class="font-semibold tracking-wide">ГДЕЯ × Аз×Буки · офлайн прототип v1</div>
+      </div>
+      <div class="text-xs text-yellow-200/70">без сборки · открой файл в браузере</div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <div id="status" class="pane mb-4">
+      <div class="text-xl gold font-semibold">Плита: <span id="plate-name"></span></div>
+      <div class="muted text-sm mt-1">Карта: <span id="card-idx">0</span> / 6</div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pane">
+        <div class="text-xs muted">КАРТА</div>
+        <div id="card-process" class="mt-1 text-2xl font-semibold gold">—</div>
+        <div class="mt-2 text-yellow-100/85">
+          Римская: <span id="card-roman" class="font-medium">—</span>
+          <span class="opacity-60"> · </span>
+          Арабская: <span id="card-arabic" class="font-medium">0</span>
+        </div>
+
+        <div class="mt-4">
+          <div class="text-xs muted mb-1">Состояния — назови ровно <span id="need-n">0</span></div>
+          <textarea id="states-input" rows="3" placeholder="впиши состояния через запятую или с новой строки"></textarea>
+          <div class="mt-1 text-xs muted">Сейчас: <span id="have-n">0</span>/<span id="need-n-2">0</span></div>
+        </div>
+
+        <div class="mt-3 flex gap-2">
+          <button id="save-btn" class="btn bg-yellow-300 text-black font-medium disabled:opacity-40">Сохранить запись и перейти</button>
+          <div class="text-xs muted self-center">Требуется: Аз + Бука + Передача и N состояний</div>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="text-sm text-yellow-200/85 font-medium mb-3">Формула материализации</div>
+
+        <div>
+          <div class="text-xs muted mb-1">Аз (внутренняя частота)</div>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <button id="rand-az" class="btn">Случайный Аз</button>
+            <div id="chosen-az" class="text-xs text-yellow-100/90"></div>
+          </div>
+          <div id="az-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-40 overflow-auto pr-1"></div>
+        </div>
+
+        <div class="mt-4">
+          <div class="text-xs muted mb-1">Бука (внешняя форма)</div>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <button id="rand-buka" class="btn">Случайная Бука</button>
+            <div id="chosen-buka" class="text-xs text-yellow-100/90"></div>
+          </div>
+          <div id="buka-list" class="grid grid-cols-2 gap-2"></div>
+        </div>
+
+        <div class="mt-4">
+          <div class="text-xs muted mb-1">Передача (фаза ⊕-движения)</div>
+          <div class="flex flex-wrap gap-2 mb-2" id="tx-list"></div>
+          <div class="text-[11px] text-yellow-200/60 mb-1">Тип точки</div>
+          <div class="flex flex-wrap gap-2 mb-2" id="pt-list"></div>
+        </div>
+
+        <div class="mt-4 pane">
+          <div class="text-xs muted mb-2">⊕ Сингулярная точка</div>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <input id="obj" placeholder="Объект">
+            <input id="img" placeholder="Образ">
+          </div>
+          <div id="superpos" class="text-xs text-yellow-100/85 mb-2"></div>
+          <div class="flex flex-wrap gap-2 mb-2" id="geom-list"></div>
+          <div class="grid grid-cols-5 gap-2 text-xs">
+            <input id="m-alpha" placeholder="α">
+            <input id="m-IY" placeholder="I_{Я}">
+            <input id="m-Cm" placeholder="C_m">
+            <input id="m-Q" placeholder="Q">
+            <input id="m-T" placeholder="T">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane mt-6">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-yellow-200/85 font-medium">Дневник <span id="diary-count">(0)</span></div>
+        <div class="flex gap-2">
+          <button id="export-csv" class="btn text-xs">Экспорт CSV</button>
+          <button id="export-json" class="btn text-xs">Экспорт JSON</button>
+        </div>
+      </div>
+
+      <div id="resonance" class="mt-4 pane">
+        <div class="text-sm text-yellow-200/85 font-medium mb-2">Резонансный отчёт</div>
+        <div id="rez-content" class="text-xs"></div>
+      </div>
+
+      <div id="diary" class="mt-4 grid md:grid-cols-2 gap-3"></div>
+    </div>
+  </main>
+
+  <footer class="py-8 text-center text-xs text-yellow-200/50">© <span id="year"></span> Архитектоника психики · GDEYA ⊗ Аз×Буки</footer>
+
+<script>
+// ======= ДАННЫЕ =======
+
+// 96 карт
+const CARDS_96 = [{"id": "R-01", "plate": "РЕСУРС", "process": "БАЗОВЫЕ ПОТРЕБНОСТИ", "arabic": 1, "roman": "I"}, {"id": "R-02", "plate": "РЕСУРС", "process": "БАЗОВЫЕ ПОТРЕБНОСТИ", "arabic": 1, "roman": "II"}, {"id": "R-03", "plate": "РЕСУРС", "process": "БАЗОВЫЕ ПОТРЕБНОСТИ", "arabic": 1, "roman": "III"}, {"id": "R-04", "plate": "РЕСУРС", "process": "БАЗОВЫЕ ПОТРЕБНОСТИ", "arabic": 1, "roman": "IV"}, {"id": "R-05", "plate": "РЕСУРС", "process": "ДОБЫВАТЬ ЗАЩИТУ", "arabic": 2, "roman": "I"}, {"id": "R-06", "plate": "РЕСУРС", "process": "ДОБЫВАТЬ ЗАЩИТУ", "arabic": 2, "roman": "II"}, {"id": "R-07", "plate": "РЕСУРС", "process": "ДОБЫВАТЬ ЗАЩИТУ", "arabic": 2, "roman": "III"}, {"id": "R-08", "plate": "РЕСУРС", "process": "ДОБЫВАТЬ ЗАЩИТУ", "arabic": 2, "roman": "IV"}, {"id": "R-09", "plate": "РЕСУРС", "process": "ПРОДОЛЖАТЬ РОД", "arabic": 3, "roman": "I"}, {"id": "R-10", "plate": "РЕСУРС", "process": "ПРОДОЛЖАТЬ РОД", "arabic": 3, "roman": "II"}, {"id": "R-11", "plate": "РЕСУРС", "process": "ПРОДОЛЖАТЬ РОД", "arabic": 3, "roman": "III"}, {"id": "R-12", "plate": "РЕСУРС", "process": "ПРОДОЛЖАТЬ РОД", "arabic": 3, "roman": "IV"}, {"id": "R-13", "plate": "РЕСУРС", "process": "УЛУЧШАТЬ УСЛОВИЯ", "arabic": 4, "roman": "I"}, {"id": "R-14", "plate": "РЕСУРС", "process": "УЛУЧШАТЬ УСЛОВИЯ", "arabic": 4, "roman": "II"}, {"id": "R-15", "plate": "РЕСУРС", "process": "УЛУЧШАТЬ УСЛОВИЯ", "arabic": 4, "roman": "III"}, {"id": "R-16", "plate": "РЕСУРС", "process": "УЛУЧШАТЬ УСЛОВИЯ", "arabic": 4, "roman": "IV"}, {"id": "R-17", "plate": "РЕСУРС", "process": "РАЗВИВАТЬ ТЕХНИКУ", "arabic": 5, "roman": "I"}, {"id": "R-18", "plate": "РЕСУРС", "process": "РАЗВИВАТЬ ТЕХНИКУ", "arabic": 5, "roman": "II"}, {"id": "R-19", "plate": "РЕСУРС", "process": "РАЗВИВАТЬ ТЕХНИКУ", "arabic": 5, "roman": "III"}, {"id": "R-20", "plate": "РЕСУРС", "process": "РАЗВИВАТЬ ТЕХНИКУ", "arabic": 5, "roman": "IV"}, {"id": "R-21", "plate": "РЕСУРС", "process": "ДОБИВАТЬСЯ УСПЕХА", "arabic": 6, "roman": "I"}, {"id": "R-22", "plate": "РЕСУРС", "process": "ДОБИВАТЬСЯ УСПЕХА", "arabic": 6, "roman": "II"}, {"id": "R-23", "plate": "РЕСУРС", "process": "ДОБИВАТЬСЯ УСПЕХА", "arabic": 6, "roman": "III"}, {"id": "R-24", "plate": "РЕСУРС", "process": "ДОБИВАТЬСЯ УСПЕХА", "arabic": 6, "roman": "IV"}, {"id": "P-01", "plate": "ВЛАСТЬ", "process": "ОБЕСПЕЧЬ БЕЗОПАСНОСТЬ", "arabic": 1, "roman": "I"}, {"id": "P-02", "plate": "ВЛАСТЬ", "process": "ОБЕСПЕЧЬ БЕЗОПАСНОСТЬ", "arabic": 1, "roman": "II"}, {"id": "P-03", "plate": "ВЛАСТЬ", "process": "ОБЕСПЕЧЬ БЕЗОПАСНОСТЬ", "arabic": 1, "roman": "III"}, {"id": "P-04", "plate": "ВЛАСТЬ", "process": "ОБЕСПЕЧЬ БЕЗОПАСНОСТЬ", "arabic": 1, "roman": "IV"}, {"id": "P-05", "plate": "ВЛАСТЬ", "process": "СОХРАНИ СЕМЬЮ", "arabic": 2, "roman": "I"}, {"id": "P-06", "plate": "ВЛАСТЬ", "process": "СОХРАНИ СЕМЬЮ", "arabic": 2, "roman": "II"}, {"id": "P-07", "plate": "ВЛАСТЬ", "process": "СОХРАНИ СЕМЬЮ", "arabic": 2, "roman": "III"}, {"id": "P-08", "plate": "ВЛАСТЬ", "process": "СОХРАНИ СЕМЬЮ", "arabic": 2, "roman": "IV"}, {"id": "P-09", "plate": "ВЛАСТЬ", "process": "ЗАЩИТИ РОД", "arabic": 3, "roman": "I"}, {"id": "P-10", "plate": "ВЛАСТЬ", "process": "ЗАЩИТИ РОД", "arabic": 3, "roman": "II"}, {"id": "P-11", "plate": "ВЛАСТЬ", "process": "ЗАЩИТИ РОД", "arabic": 3, "roman": "III"}, {"id": "P-12", "plate": "ВЛАСТЬ", "process": "ЗАЩИТИ РОД", "arabic": 3, "roman": "IV"}, {"id": "P-13", "plate": "ВЛАСТЬ", "process": "ВОССТАНОВИ ВНИМАНИЕ", "arabic": 4, "roman": "I"}, {"id": "P-14", "plate": "ВЛАСТЬ", "process": "ВОССТАНОВИ ВНИМАНИЕ", "arabic": 4, "roman": "II"}, {"id": "P-15", "plate": "ВЛАСТЬ", "process": "ВОССТАНОВИ ВНИМАНИЕ", "arabic": 4, "roman": "III"}, {"id": "P-16", "plate": "ВЛАСТЬ", "process": "ВОССТАНОВИ ВНИМАНИЕ", "arabic": 4, "roman": "IV"}, {"id": "P-17", "plate": "ВЛАСТЬ", "process": "ЦЕНИ РАВЕНСТВО", "arabic": 5, "roman": "I"}, {"id": "P-18", "plate": "ВЛАСТЬ", "process": "ЦЕНИ РАВЕНСТВО", "arabic": 5, "roman": "II"}, {"id": "P-19", "plate": "ВЛАСТЬ", "process": "ЦЕНИ РАВЕНСТВО", "arabic": 5, "roman": "III"}, {"id": "P-20", "plate": "ВЛАСТЬ", "process": "ЦЕНИ РАВЕНСТВО", "arabic": 5, "roman": "IV"}, {"id": "P-21", "plate": "ВЛАСТЬ", "process": "ОТВЕЧАЙ НА ЧУВСТВА", "arabic": 6, "roman": "I"}, {"id": "P-22", "plate": "ВЛАСТЬ", "process": "ОТВЕЧАЙ НА ЧУВСТВА", "arabic": 6, "roman": "II"}, {"id": "P-23", "plate": "ВЛАСТЬ", "process": "ОТВЕЧАЙ НА ЧУВСТВА", "arabic": 6, "roman": "III"}, {"id": "P-24", "plate": "ВЛАСТЬ", "process": "ОТВЕЧАЙ НА ЧУВСТВА", "arabic": 6, "roman": "IV"}, {"id": "C-01", "plate": "ОТНОШЕНИЯ", "process": "БРОСАТЬ ВЫЗОВ", "arabic": 1, "roman": "I"}, {"id": "C-02", "plate": "ОТНОШЕНИЯ", "process": "БРОСАТЬ ВЫЗОВ", "arabic": 1, "roman": "II"}, {"id": "C-03", "plate": "ОТНОШЕНИЯ", "process": "БРОСАТЬ ВЫЗОВ", "arabic": 1, "roman": "III"}, {"id": "C-04", "plate": "ОТНОШЕНИЯ", "process": "БРОСАТЬ ВЫЗОВ", "arabic": 1, "roman": "IV"}, {"id": "C-05", "plate": "ОТНОШЕНИЯ", "process": "УТВЕРЖДАТЬ СЕБЯ", "arabic": 2, "roman": "I"}, {"id": "C-06", "plate": "ОТНОШЕНИЯ", "process": "УТВЕРЖДАТЬ СЕБЯ", "arabic": 2, "roman": "II"}, {"id": "C-07", "plate": "ОТНОШЕНИЯ", "process": "УТВЕРЖДАТЬ СЕБЯ", "arabic": 2, "roman": "III"}, {"id": "C-08", "plate": "ОТНОШЕНИЯ", "process": "УТВЕРЖДАТЬ СЕБЯ", "arabic": 2, "roman": "IV"}, {"id": "C-09", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К ДЕЙСТВИЮ", "arabic": 3, "roman": "I"}, {"id": "C-10", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К ДЕЙСТВИЮ", "arabic": 3, "roman": "II"}, {"id": "C-11", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К ДЕЙСТВИЮ", "arabic": 3, "roman": "III"}, {"id": "C-12", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К ДЕЙСТВИЮ", "arabic": 3, "roman": "IV"}, {"id": "C-13", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К РАВНОВЕСИЮ", "arabic": 4, "roman": "I"}, {"id": "C-14", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К РАВНОВЕСИЮ", "arabic": 4, "roman": "II"}, {"id": "C-15", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К РАВНОВЕСИЮ", "arabic": 4, "roman": "III"}, {"id": "C-16", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К РАВНОВЕСИЮ", "arabic": 4, "roman": "IV"}, {"id": "C-17", "plate": "ОТНОШЕНИЯ", "process": "СОЗДАВАТЬ СИСТЕМЫ", "arabic": 5, "roman": "I"}, {"id": "C-18", "plate": "ОТНОШЕНИЯ", "process": "СОЗДАВАТЬ СИСТЕМЫ", "arabic": 5, "roman": "II"}, {"id": "C-19", "plate": "ОТНОШЕНИЯ", "process": "СОЗДАВАТЬ СИСТЕМЫ", "arabic": 5, "roman": "III"}, {"id": "C-20", "plate": "ОТНОШЕНИЯ", "process": "СОЗДАВАТЬ СИСТЕМЫ", "arabic": 5, "roman": "IV"}, {"id": "C-21", "plate": "ОТНОШЕНИЯ", "process": "ЦЕНИТЬ ЕСТЕСТВЕННОСТЬ", "arabic": 6, "roman": "I"}, {"id": "C-22", "plate": "ОТНОШЕНИЯ", "process": "ЦЕНИТЬ ЕСТЕСТВЕННОСТЬ", "arabic": 6, "roman": "II"}, {"id": "C-23", "plate": "ОТНОШЕНИЯ", "process": "ЦЕНИТЬ ЕСТЕСТВЕННОСТЬ", "arabic": 6, "roman": "III"}, {"id": "C-24", "plate": "ОТНОШЕНИЯ", "process": "ЦЕНИТЬ ЕСТЕСТВЕННОСТЬ", "arabic": 6, "roman": "IV"}, {"id": "O-01", "plate": "РЕЗУЛЬТАТ", "process": "АДАПТИРОВАТЬСЯ К ВЕРОВАНИЯМ", "arabic": 1, "roman": "I"}, {"id": "O-02", "plate": "РЕЗУЛЬТАТ", "process": "АДАПТИРОВАТЬСЯ К ВЕРОВАНИЯМ", "arabic": 1, "roman": "II"}, {"id": "O-03", "plate": "РЕЗУЛЬТАТ", "process": "АДАПТИРОВАТЬСЯ К ВЕРОВАНИЯМ", "arabic": 1, "roman": "III"}, {"id": "O-04", "plate": "РЕЗУЛЬТАТ", "process": "АДАПТИРОВАТЬСЯ К ВЕРОВАНИЯМ", "arabic": 1, "roman": "IV"}, {"id": "O-05", "plate": "РЕЗУЛЬТАТ", "process": "ЖЕРТВОВАТЬ ИНТЕРЕСАМИ", "arabic": 2, "roman": "I"}, {"id": "O-06", "plate": "РЕЗУЛЬТАТ", "process": "ЖЕРТВОВАТЬ ИНТЕРЕСАМИ", "arabic": 2, "roman": "II"}, {"id": "O-07", "plate": "РЕЗУЛЬТАТ", "process": "ЖЕРТВОВАТЬ ИНТЕРЕСАМИ", "arabic": 2, "roman": "III"}, {"id": "O-08", "plate": "РЕЗУЛЬТАТ", "process": "ЖЕРТВОВАТЬ ИНТЕРЕСАМИ", "arabic": 2, "roman": "IV"}, {"id": "O-09", "plate": "РЕЗУЛЬТАТ", "process": "СОБЛЮДАТЬ ДИСЦИПЛИНУ", "arabic": 3, "roman": "I"}, {"id": "O-10", "plate": "РЕЗУЛЬТАТ", "process": "СОБЛЮДАТЬ ДИСЦИПЛИНУ", "arabic": 3, "roman": "II"}, {"id": "O-11", "plate": "РЕЗУЛЬТАТ", "process": "СОБЛЮДАТЬ ДИСЦИПЛИНУ", "arabic": 3, "roman": "III"}, {"id": "O-12", "plate": "РЕЗУЛЬТАТ", "process": "СОБЛЮДАТЬ ДИСЦИПЛИНУ", "arabic": 3, "roman": "IV"}, {"id": "O-13", "plate": "РЕЗУЛЬТАТ", "process": "БЫТЬ В МОДЕЛИ ЦЕЛОГО", "arabic": 4, "roman": "I"}, {"id": "O-14", "plate": "РЕЗУЛЬТАТ", "process": "БЫТЬ В МОДЕЛИ ЦЕЛОГО", "arabic": 4, "roman": "II"}, {"id": "O-15", "plate": "РЕЗУЛЬТАТ", "process": "БЫТЬ В МОДЕЛИ ЦЕЛОГО", "arabic": 4, "roman": "III"}, {"id": "O-16", "plate": "РЕЗУЛЬТАТ", "process": "БЫТЬ В МОДЕЛИ ЦЕЛОГО", "arabic": 4, "roman": "IV"}, {"id": "O-17", "plate": "РЕЗУЛЬТАТ", "process": "СОЕДИНЯТЬ ТОЧКИ", "arabic": 5, "roman": "I"}, {"id": "O-18", "plate": "РЕЗУЛЬТАТ", "process": "СОЕДИНЯТЬ ТОЧКИ", "arabic": 5, "roman": "II"}, {"id": "O-19", "plate": "РЕЗУЛЬТАТ", "process": "СОЕДИНЯТЬ ТОЧКИ", "arabic": 5, "roman": "III"}, {"id": "O-20", "plate": "РЕЗУЛЬТАТ", "process": "СОЕДИНЯТЬ ТОЧКИ", "arabic": 5, "roman": "IV"}, {"id": "O-21", "plate": "РЕЗУЛЬТАТ", "process": "ВОССТАНАВЛИВАТЬ ДУХОВНОСТЬ", "arabic": 6, "roman": "I"}, {"id": "O-22", "plate": "РЕЗУЛЬТАТ", "process": "ВОССТАНАВЛИВАТЬ ДУХОВНОСТЬ", "arabic": 6, "roman": "II"}, {"id": "O-23", "plate": "РЕЗУЛЬТАТ", "process": "ВОССТАНАВЛИВАТЬ ДУХОВНОСТЬ", "arabic": 6, "roman": "III"}, {"id": "O-24", "plate": "РЕЗУЛЬТАТ", "process": "ВОССТАНАВЛИВАТЬ ДУХОВНОСТЬ", "arabic": 6, "roman": "IV"}];
+
+// Аз (20 примеров для офлайна; можно расширить)
+const AZ = [{"id": "A1", "title": "Азъ (А)"}, {"id": "A2", "title": "Буки (Б)"}, {"id": "A3", "title": "Веди (В)"}, {"id": "A4", "title": "Глаголь (Г)"}, {"id": "A5", "title": "Добро (Д)"}, {"id": "A6", "title": "Есть (Е)"}, {"id": "A7", "title": "Живѣтє (Ж)"}, {"id": "A8", "title": "Зело (З)"}, {"id": "A9", "title": "Земля (Ѕ)"}, {"id": "A10", "title": "Иже (И)"}, {"id": "A11", "title": "И (І)"}, {"id": "A12", "title": "Како (К)"}, {"id": "A13", "title": "Люди (Л)"}, {"id": "A14", "title": "Мыслете (М)"}, {"id": "A15", "title": "Наш (Н)"}, {"id": "A16", "title": "Он (О)"}, {"id": "A17", "title": "Покой (П)"}, {"id": "A18", "title": "Рцы (Р)"}, {"id": "A19", "title": "Слово (С)"}, {"id": "A20", "title": "Твердо (Т)"}];
+
+// Буки (24)
+const BUKI = [{"id": "B1", "symbol": "⊕", "title": "Суперпозиция"}, {"id": "B2", "symbol": "∅", "title": "Пустота"}, {"id": "B3", "symbol": "τ", "title": "Пластичность времени"}, {"id": "B4", "symbol": "Ψ", "title": "Волновая форма"}, {"id": "B5", "symbol": "C^{⊕}", "title": "⊕‑Капитал"}, {"id": "B6", "symbol": "Σ", "title": "Сумма резонансов"}, {"id": "B7", "symbol": "φ", "title": "Фаза пробуждения"}, {"id": "B8", "symbol": "R_f", "title": "Резонанс с будущим"}, {"id": "B9", "symbol": "∇", "title": "Градиент"}, {"id": "B10", "symbol": "I_{Я}", "title": "Интеграция ядра"}, {"id": "B11", "symbol": "⊗", "title": "Точка кристаллизации"}, {"id": "B12", "symbol": "F_s", "title": "Поток смысла"}, {"id": "B13", "symbol": "λ", "title": "Длина волны"}, {"id": "B14", "symbol": "A", "title": "Амплитуда переживания"}, {"id": "B15", "symbol": "∆S", "title": "Изменение смысла"}, {"id": "B16", "symbol": "Q", "title": "Качество отклика"}, {"id": "B17", "symbol": "T", "title": "Текучесть"}, {"id": "B18", "symbol": "S_f", "title": "Структурная форма"}, {"id": "B19", "symbol": "C_m", "title": "Контейнер смыслов"}, {"id": "B20", "symbol": "E^{⊕}", "title": "Энтропическая энергия"}, {"id": "B21", "symbol": "α", "title": "Коэффициент соответствия"}, {"id": "B22", "symbol": "k", "title": "Плотность восприятия"}, {"id": "B23", "symbol": "ω", "title": "Частота обновления"}, {"id": "B24", "symbol": "⊕(Σ)", "title": "Суперпозиция систем"}];
+
+// Передачи (7)
+const TX = [{"id": "TX1", "title": "Ядро"}, {"id": "TX2", "title": "Орбита"}, {"id": "TX3", "title": "Резонанс"}, {"id": "TX4", "title": "Мост"}, {"id": "TX5", "title": "Материализация"}, {"id": "TX6", "title": "Интеграция"}, {"id": "TX7", "title": "Перезапуск"}];
+
+// Геометрии, типы точки, рекомендации
+const GEOM = [{"id": "Euclid", "label": "Евклид"}, {"id": "Lobachevsky", "label": "Лобачевский"}, {"id": "Riemann", "label": "Риман"}, {"id": "Projective", "label": "Проектив"}, {"id": "Supra", "label": "Сверх"}];
+const PT = [{"id": "Разрыв", "hint": "Сшить порог"}, {"id": "Залипание", "hint": "Дать движение"}, {"id": "Вход", "hint": "Принять сигнал"}, {"id": "Интеграция", "hint": "Встроить и закрыть"}];
+const PT2TX = {"Разрыв": ["TX1", "TX7"], "Залипание": ["TX2", "TX3"], "Вход": ["TX3", "TX4"], "Интеграция": ["TX6", "TX5"]};
+
+// ======= ЛОГИКА =======
+function shuffle(a){ const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [r[i],r[j]]=[r[j],r[i]];} return r; }
+const SEQ = ["РЕСУРС","ВЛАСТЬ","ОТНОШЕНИЯ","РЕЗУЛЬТАТ"];
+let plateIdx = 0;
+let drawn = [];
+let cardIdx = 0;
+let diary = [];
+
+let chosenAz = null, chosenBuka = null, chosenTx = null;
+let chosenGeom = GEOM[0].id, chosenPt = PT[0].id;
+
+function startPlate() {
+  const plate = SEQ[plateIdx];
+  drawn = shuffle(CARDS_96.filter(c=>c.plate===plate)).slice(0,6);
+  cardIdx = 0;
+  updateStatus();
+  renderCard();
+}
+
+function nextStep() {
+  if (cardIdx < 5) { cardIdx++; renderCard(); return; }
+  if (plateIdx < SEQ.length - 1) { plateIdx++; startPlate(); return; }
+  alert("Цикл завершён. Открой резонансный отчёт ниже.");
+}
+
+function updateStatus() {
+  document.getElementById("plate-name").textContent = SEQ[plateIdx];
+  document.getElementById("card-idx").textContent = (cardIdx+1);
+}
+
+function renderCard() {
+  const c = drawn[cardIdx];
+  document.getElementById("card-process").textContent = c.process;
+  document.getElementById("card-roman").textContent = c.roman;
+  document.getElementById("card-arabic").textContent = c.arabic;
+  document.getElementById("need-n").textContent = c.arabic;
+  document.getElementById("need-n-2").textContent = c.arabic;
+  document.getElementById("states-input").value = "";
+  document.getElementById("have-n").textContent = "0";
+  updateCanSave();
+}
+
+function parseStates() {
+  const raw = document.getElementById("states-input").value;
+  return raw.split(/[,
+;]/).map(s=>s.trim()).filter(Boolean);
+}
+
+function updateCanSave() {
+  const c = drawn[cardIdx];
+  const states = parseStates();
+  const haveN = states.length;
+  document.getElementById("have-n").textContent = haveN;
+  const ok = (chosenAz && chosenBuka && chosenTx && haveN === c.arabic);
+  const btn = document.getElementById("save-btn");
+  if (ok) { btn.classList.remove("opacity-40"); btn.disabled=false; }
+  else { btn.classList.add("opacity-40"); btn.disabled=true; }
+}
+
+function chooseAz(id) {
+  chosenAz = AZ.find(a=>a.id===id);
+  document.getElementById("chosen-az").textContent = "Выбрано: " + chosenAz.title;
+  updateCanSave();
+}
+function chooseBuka(id) {
+  chosenBuka = BUKI.find(b=>b.id===id);
+  document.getElementById("chosen-buka").textContent = "Выбрано: " + chosenBuka.symbol + " " + chosenBuka.title;
+  updateCanSave();
+}
+function chooseTx(id) {
+  chosenTx = TX.find(t=>t.id===id);
+  updateCanSave();
+}
+function pickRandAz(){ chooseAz(AZ[Math.floor(Math.random()*AZ.length)].id); }
+function pickRandBuka(){ chooseBuka(BUKI[Math.floor(Math.random()*BUKI.length)].id); }
+
+function renderLists(){
+  const azL = document.getElementById("az-list");
+  azL.innerHTML = AZ.map(a=>`<button class="btn text-xs text-left" onclick="chooseAz('${a.id}')">${a.title}</button>`).join("");
+  const bL = document.getElementById("buka-list");
+  bL.innerHTML = BUKI.map(b=>`<button class="btn text-xs text-left" onclick="chooseBuka('${b.id}')">${b.symbol} ${b.title}</button>`).join("");
+  const tL = document.getElementById("tx-list");
+  tL.innerHTML = TX.map(t=>`<button class="btn text-xs ${t.id===chosenTx?.id?'bg-yellow-300 text-black':''}" onclick="chooseTx('${t.id}')">${t.title}</button>`).join("");
+  const ptL = document.getElementById("pt-list");
+  ptL.innerHTML = PT.map(p=>`<button class="btn text-xs ${p.id===chosenPt?'bg-yellow-300/20':''}" title="${p.hint}" onclick="setPt('${p.id}')">${p.id}</button>`).join("");
+  const gL = document.getElementById("geom-list");
+  gL.innerHTML = GEOM.map(g=>`<button class="btn text-xs ${g.id===chosenGeom?'bg-yellow-300/20':''}" onclick="setGeom('${g.id}')">${g.label}</button>`).join("");
+}
+function setPt(id){ chosenPt = id; renderLists(); const rec = (PT2TX[id]||[])[0]; if (rec) chooseTx(rec); }
+function setGeom(id){ chosenGeom = id; renderLists(); }
+
+function saveEntry(){
+  const c = drawn[cardIdx];
+  const states = parseStates().slice(0, c.arabic);
+  const superpos = (()=>{
+    const o = document.getElementById("obj").value.trim();
+    const i = document.getElementById("img").value.trim();
+    return (o||i) ? `${o||"…"} ⊕ ${i||"…"} ` : "";
+  })();
+  const metrics = {
+    alpha: document.getElementById("m-alpha").value,
+    IY: document.getElementById("m-IY").value,
+    Cm: document.getElementById("m-Cm").value,
+    Q: document.getElementById("m-Q").value,
+    T: document.getElementById("m-T").value
+  };
+  diary.unshift({
+    ts: new Date().toLocaleString(),
+    plate: SEQ[plateIdx],
+    card: c,
+    states,
+    az: chosenAz, buka: chosenBuka, tx: chosenTx,
+    superposition: superpos, geometry: chosenGeom, pointType: chosenPt,
+    metrics
+  });
+  renderDiary();
+  nextStep();
+}
+
+function renderDiary(){
+  document.getElementById("diary-count").textContent = `(${diary.length})`;
+  const root = document.getElementById("diary");
+  if (!diary.length){ root.innerHTML = '<div class="muted text-sm">Записей пока нет.</div>'; return; }
+  root.innerHTML = diary.map(d=>`
+    <div class="pane">
+      <div class="flex items-center justify-between">
+        <div class="text-xs text-yellow-200/60">${d.ts}</div>
+        <div class="text-[11px] text-yellow-200/70">${d.plate}</div>
+      </div>
+      <div class="mt-1 text-sm">
+        <span class="text-yellow-200/80">Карта: </span>
+        <span class="text-yellow-100/90">${d.card.process}</span>
+        <span class="text-yellow-200/60"> · </span>
+        <span class="text-yellow-200/80">I–IV:</span> ${d.card.roman}
+        <span class="text-yellow-200/60"> · </span>
+        <span class="text-yellow-200/80">N:</span> ${d.card.arabic}
+      </div>
+      <div class="mt-1 text-xs text-yellow-200/75">
+        <span class="text-yellow-200/80">Формула:</span>
+        ${d.az?.title ?? ""} × ${d.buka ? (d.buka.symbol+" "+d.buka.title) : ""} → ${d.tx?.title ?? ""}
+      </div>
+      ${d.superposition ? `<div class="mt-1 text-xs text-yellow-200/70">⊕ ${d.superposition} • ${d.geometry} • ${d.pointType}</div>` : ""}
+      <div class="mt-1 text-xs text-yellow-100/80">
+        ${d.states.map(s=>`<span class="chip">${s}</span>`).join("")}
+      </div>
+    </div>
+  `).join("");
+
+  // резонанс
+  const R = { byPlate:{}, byPhase:{}, byAz:{}, byBuka:{}, byTx:{} };
+  diary.forEach(d=>{
+    R.byPlate[d.plate] = (R.byPlate[d.plate]||0)+1;
+    R.byPhase[d.card.roman] = (R.byPhase[d.card.roman]||0)+1;
+    if (d.az) R.byAz[d.az.title] = (R.byAz[d.az.title]||0)+1;
+    if (d.buka) R.byBuka[`${d.buka.symbol} ${d.buka.title}`] = (R.byBuka[`${d.buka.symbol} ${d.buka.title}`]||0)+1;
+    if (d.tx) R.byTx[d.tx.title] = (R.byTx[d.tx.title]||0)+1;
+  });
+  function block(title, obj){
+    const entries = Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    return `<div class="mt-2">
+      <div class="text-xs muted">${title}</div>
+      <div class="mt-1 flex flex-wrap gap-2">
+        ${entries.map(([k,v])=>`<span class="chip text-xs">${k} — ${v}</span>`).join("")}
+      </div>
+    </div>`;
+  }
+  document.getElementById("rez-content").innerHTML =
+    block("По плитам", R.byPlate) +
+    block("По фазам (I–IV)", R.byPhase) +
+    block("Топ Аз", R.byAz) +
+    block("Топ Буки", R.byBuka) +
+    block("Топ Передач", R.byTx);
+}
+
+function download(name, content, type){
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name; a.click();
+  URL.revokeObjectURL(url);
+}
+function toCSV(rows){
+  if (!rows.length) return "";
+  const head = Object.keys(rows[0]);
+  const esc = v => {
+    const s = String(v ?? "");
+    return /[",\n;]/.test(s) ? `"` + s.replace(/"/g, '""') + `"` : s;
+  };
+  const lines = [head.join(",")];
+  for (const r of rows) lines.push(head.map(k => esc(r[k])).join(","));
+  return lines.join("\n");
+}
+
+// ======= WIRING =======
+document.getElementById("year").textContent = new Date().getFullYear();
+renderLists();
+startPlate();
+document.getElementById("states-input").addEventListener("input", updateCanSave);
+document.getElementById("save-btn").addEventListener("click", saveEntry);
+document.getElementById("rand-az").addEventListener("click", pickRandAz);
+document.getElementById("rand-buka").addEventListener("click", pickRandBuka);
+
+['obj','img','m-alpha','m-IY','m-Cm','m-Q','m-T'].forEach(id=>{
+  document.getElementById(id).addEventListener("input", ()=>{
+    const o=document.getElementById('obj').value.trim();
+    const i=document.getElementById('img').value.trim();
+    document.getElementById('superpos').textContent = (o||i)? `⊕ ${o||"…"} ⊕ ${i||"…"} ` : "";
+  });
+});
+
+document.getElementById("export-csv").addEventListener("click", ()=>{
+  const rows = diary.map(d=>({
+    ts: d.ts, plate: d.plate, card_id: d.card.id, process: d.card.process,
+    roman: d.card.roman, arabic: d.card.arabic,
+    az: d.az?.title ?? "", buka: d.buka ? (d.buka.symbol+" "+d.buka.title) : "",
+    tx: d.tx?.title ?? "", superposition: d.superposition ?? "",
+    geometry: d.geometry ?? "", pointType: d.pointType ?? "",
+    metrics: JSON.stringify(d.metrics ?? {}),
+    states: d.states.join(" | ")
+  }));
+  download(`gdeya_diary_${new Date().toISOString().slice(0,10)}.csv`, toCSV(rows), "text/csv;charset=utf-8");
+});
+document.getElementById("export-json").addEventListener("click", ()=>{
+  download(`gdeya_diary_${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(diary, null, 2), "application/json;charset=utf-8");
+});
+
+document.getElementById("states-input").addEventListener("keydown", (e)=>{
+  if ((e.ctrlKey||e.metaKey) && e.key === "Enter"){
+    e.preventDefault();
+    if (!document.getElementById("save-btn").disabled) saveEntry();
+  }
+});
+</script>
+</body>
+</html>

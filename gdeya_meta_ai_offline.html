@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>ГДЕЯ · Мета-версия — AI‑проводник (офлайн)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body{margin:0;background:#0a0f1c;color:#fef9c3;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px;}
+  .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+  .pane{background:rgba(0,0,0,.2);border:1px solid rgba(250,204,21,.2);border-radius:16px;padding:16px;}
+  .gold{color:#facc15}
+  .muted{color:rgba(254,249,195,.65)}
+  .log{height:60vh;overflow:auto;display:flex;flex-direction:column;gap:10px}
+  .msg{padding:10px 12px;border-radius:12px;max-width:80%}
+  .ai{align-self:flex-start;background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.25)}
+  .me{align-self:flex-end;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+  .row{display:flex;gap:8px}
+  .btn{display:inline-block;border-radius:10px;border:1px solid rgba(250,204,21,.35);padding:6px 10px;background:transparent;color:#fef9c3;cursor:pointer}
+  .btn:hover{background:rgba(250,204,21,.1)}
+  .chip{display:inline-block;margin:2px;padding:2px 8px;border-radius:8px;background:rgba(250,204,21,.15);border:1px solid rgba(250,204,21,.3);font-size:12px}
+  input,textarea{background:rgba(0,0,0,.3);border:1px solid rgba(250,204,21,.2);color:#fff;border-radius:12px;padding:10px}
+  .small{font-size:12px}
+  .title{font-weight:700;font-size:18px}
+  .hint{font-size:12px;color:rgba(254,249,195,.7)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="grid">
+    <div class="pane">
+      <div class="title gold">AI‑проводник · «ГДЕЯ»</div>
+      <div class="hint">Кнопка «Вытянуть карту» — старт цикла. Пиши живым языком, как в сессии.</div>
+      <div id="log" class="log"></div>
+      <div class="row" style="margin-top:10px">
+        <input id="inp" placeholder="Скажи: что откликается сейчас?" style="flex:1">
+        <button id="send" class="btn">Отправить</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button id="btn-draw" class="btn">Вытянуть карту</button>
+        <button id="btn-export" class="btn">Экспорт диалога</button>
+      </div>
+    </div>
+
+    <div class="pane">
+      <div class="title">Панель выбора</div>
+      <div class="small muted">Текущая плита: <span id="plate"></span></div>
+      <div class="small muted">Карта: <span id="card"></span></div>
+
+      <div style="margin-top:10px">
+        <div class="small muted">Аз</div>
+        <div id="az-list" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px"></div>
+        <div id="az-chosen" class="hint" style="margin-top:4px"></div>
+      </div>
+
+      <div style="margin-top:10px">
+        <div class="small muted">Бука</div>
+        <div id="buka-list" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px"></div>
+        <div id="buka-chosen" class="hint" style="margin-top:4px"></div>
+      </div>
+
+      <div style="margin-top:10px">
+        <div class="small muted">Передача</div>
+        <div id="tx-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <div id="tx-chosen" class="hint" style="margin-top:4px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Data =====
+var CARDS_96 = [{"id": "R-01", "plate": "РЕСУРС", "process": "БАЗОВЫЕ ПОТРЕБНОСТИ", "arabic": 1, "roman": "I"}, {"id": "R-02", "plate": "РЕСУРС", "process": "БАЗОВЫЕ ПОТРЕБНОСТИ", "arabic": 1, "roman": "II"}, {"id": "R-03", "plate": "РЕСУРС", "process": "БАЗОВЫЕ ПОТРЕБНОСТИ", "arabic": 1, "roman": "III"}, {"id": "R-04", "plate": "РЕСУРС", "process": "БАЗОВЫЕ ПОТРЕБНОСТИ", "arabic": 1, "roman": "IV"}, {"id": "R-05", "plate": "РЕСУРС", "process": "ДОБЫВАТЬ ЗАЩИТУ", "arabic": 2, "roman": "I"}, {"id": "R-06", "plate": "РЕСУРС", "process": "ДОБЫВАТЬ ЗАЩИТУ", "arabic": 2, "roman": "II"}, {"id": "R-07", "plate": "РЕСУРС", "process": "ДОБЫВАТЬ ЗАЩИТУ", "arabic": 2, "roman": "III"}, {"id": "R-08", "plate": "РЕСУРС", "process": "ДОБЫВАТЬ ЗАЩИТУ", "arabic": 2, "roman": "IV"}, {"id": "R-09", "plate": "РЕСУРС", "process": "ПРОДОЛЖАТЬ РОД", "arabic": 3, "roman": "I"}, {"id": "R-10", "plate": "РЕСУРС", "process": "ПРОДОЛЖАТЬ РОД", "arabic": 3, "roman": "II"}, {"id": "R-11", "plate": "РЕСУРС", "process": "ПРОДОЛЖАТЬ РОД", "arabic": 3, "roman": "III"}, {"id": "R-12", "plate": "РЕСУРС", "process": "ПРОДОЛЖАТЬ РОД", "arabic": 3, "roman": "IV"}, {"id": "R-13", "plate": "РЕСУРС", "process": "УЛУЧШАТЬ УСЛОВИЯ", "arabic": 4, "roman": "I"}, {"id": "R-14", "plate": "РЕСУРС", "process": "УЛУЧШАТЬ УСЛОВИЯ", "arabic": 4, "roman": "II"}, {"id": "R-15", "plate": "РЕСУРС", "process": "УЛУЧШАТЬ УСЛОВИЯ", "arabic": 4, "roman": "III"}, {"id": "R-16", "plate": "РЕСУРС", "process": "УЛУЧШАТЬ УСЛОВИЯ", "arabic": 4, "roman": "IV"}, {"id": "R-17", "plate": "РЕСУРС", "process": "РАЗВИВАТЬ ТЕХНИКУ", "arabic": 5, "roman": "I"}, {"id": "R-18", "plate": "РЕСУРС", "process": "РАЗВИВАТЬ ТЕХНИКУ", "arabic": 5, "roman": "II"}, {"id": "R-19", "plate": "РЕСУРС", "process": "РАЗВИВАТЬ ТЕХНИКУ", "arabic": 5, "roman": "III"}, {"id": "R-20", "plate": "РЕСУРС", "process": "РАЗВИВАТЬ ТЕХНИКУ", "arabic": 5, "roman": "IV"}, {"id": "R-21", "plate": "РЕСУРС", "process": "ДОБИВАТЬСЯ УСПЕХА", "arabic": 6, "roman": "I"}, {"id": "R-22", "plate": "РЕСУРС", "process": "ДОБИВАТЬСЯ УСПЕХА", "arabic": 6, "roman": "II"}, {"id": "R-23", "plate": "РЕСУРС", "process": "ДОБИВАТЬСЯ УСПЕХА", "arabic": 6, "roman": "III"}, {"id": "R-24", "plate": "РЕСУРС", "process": "ДОБИВАТЬСЯ УСПЕХА", "arabic": 6, "roman": "IV"}, {"id": "P-01", "plate": "ВЛАСТЬ", "process": "ОБЕСПЕЧЬ БЕЗОПАСНОСТЬ", "arabic": 1, "roman": "I"}, {"id": "P-02", "plate": "ВЛАСТЬ", "process": "ОБЕСПЕЧЬ БЕЗОПАСНОСТЬ", "arabic": 1, "roman": "II"}, {"id": "P-03", "plate": "ВЛАСТЬ", "process": "ОБЕСПЕЧЬ БЕЗОПАСНОСТЬ", "arabic": 1, "roman": "III"}, {"id": "P-04", "plate": "ВЛАСТЬ", "process": "ОБЕСПЕЧЬ БЕЗОПАСНОСТЬ", "arabic": 1, "roman": "IV"}, {"id": "P-05", "plate": "ВЛАСТЬ", "process": "СОХРАНИ СЕМЬЮ", "arabic": 2, "roman": "I"}, {"id": "P-06", "plate": "ВЛАСТЬ", "process": "СОХРАНИ СЕМЬЮ", "arabic": 2, "roman": "II"}, {"id": "P-07", "plate": "ВЛАСТЬ", "process": "СОХРАНИ СЕМЬЮ", "arabic": 2, "roman": "III"}, {"id": "P-08", "plate": "ВЛАСТЬ", "process": "СОХРАНИ СЕМЬЮ", "arabic": 2, "roman": "IV"}, {"id": "P-09", "plate": "ВЛАСТЬ", "process": "ЗАЩИТИ РОД", "arabic": 3, "roman": "I"}, {"id": "P-10", "plate": "ВЛАСТЬ", "process": "ЗАЩИТИ РОД", "arabic": 3, "roman": "II"}, {"id": "P-11", "plate": "ВЛАСТЬ", "process": "ЗАЩИТИ РОД", "arabic": 3, "roman": "III"}, {"id": "P-12", "plate": "ВЛАСТЬ", "process": "ЗАЩИТИ РОД", "arabic": 3, "roman": "IV"}, {"id": "P-13", "plate": "ВЛАСТЬ", "process": "ВОССТАНОВИ ВНИМАНИЕ", "arabic": 4, "roman": "I"}, {"id": "P-14", "plate": "ВЛАСТЬ", "process": "ВОССТАНОВИ ВНИМАНИЕ", "arabic": 4, "roman": "II"}, {"id": "P-15", "plate": "ВЛАСТЬ", "process": "ВОССТАНОВИ ВНИМАНИЕ", "arabic": 4, "roman": "III"}, {"id": "P-16", "plate": "ВЛАСТЬ", "process": "ВОССТАНОВИ ВНИМАНИЕ", "arabic": 4, "roman": "IV"}, {"id": "P-17", "plate": "ВЛАСТЬ", "process": "ЦЕНИ РАВЕНСТВО", "arabic": 5, "roman": "I"}, {"id": "P-18", "plate": "ВЛАСТЬ", "process": "ЦЕНИ РАВЕНСТВО", "arabic": 5, "roman": "II"}, {"id": "P-19", "plate": "ВЛАСТЬ", "process": "ЦЕНИ РАВЕНСТВО", "arabic": 5, "roman": "III"}, {"id": "P-20", "plate": "ВЛАСТЬ", "process": "ЦЕНИ РАВЕНСТВО", "arabic": 5, "roman": "IV"}, {"id": "P-21", "plate": "ВЛАСТЬ", "process": "ОТВЕЧАЙ НА ЧУВСТВА", "arabic": 6, "roman": "I"}, {"id": "P-22", "plate": "ВЛАСТЬ", "process": "ОТВЕЧАЙ НА ЧУВСТВА", "arabic": 6, "roman": "II"}, {"id": "P-23", "plate": "ВЛАСТЬ", "process": "ОТВЕЧАЙ НА ЧУВСТВА", "arabic": 6, "roman": "III"}, {"id": "P-24", "plate": "ВЛАСТЬ", "process": "ОТВЕЧАЙ НА ЧУВСТВА", "arabic": 6, "roman": "IV"}, {"id": "C-01", "plate": "ОТНОШЕНИЯ", "process": "БРОСАТЬ ВЫЗОВ", "arabic": 1, "roman": "I"}, {"id": "C-02", "plate": "ОТНОШЕНИЯ", "process": "БРОСАТЬ ВЫЗОВ", "arabic": 1, "roman": "II"}, {"id": "C-03", "plate": "ОТНОШЕНИЯ", "process": "БРОСАТЬ ВЫЗОВ", "arabic": 1, "roman": "III"}, {"id": "C-04", "plate": "ОТНОШЕНИЯ", "process": "БРОСАТЬ ВЫЗОВ", "arabic": 1, "roman": "IV"}, {"id": "C-05", "plate": "ОТНОШЕНИЯ", "process": "УТВЕРЖДАТЬ СЕБЯ", "arabic": 2, "roman": "I"}, {"id": "C-06", "plate": "ОТНОШЕНИЯ", "process": "УТВЕРЖДАТЬ СЕБЯ", "arabic": 2, "roman": "II"}, {"id": "C-07", "plate": "ОТНОШЕНИЯ", "process": "УТВЕРЖДАТЬ СЕБЯ", "arabic": 2, "roman": "III"}, {"id": "C-08", "plate": "ОТНОШЕНИЯ", "process": "УТВЕРЖДАТЬ СЕБЯ", "arabic": 2, "roman": "IV"}, {"id": "C-09", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К ДЕЙСТВИЮ", "arabic": 3, "roman": "I"}, {"id": "C-10", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К ДЕЙСТВИЮ", "arabic": 3, "roman": "II"}, {"id": "C-11", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К ДЕЙСТВИЮ", "arabic": 3, "roman": "III"}, {"id": "C-12", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К ДЕЙСТВИЮ", "arabic": 3, "roman": "IV"}, {"id": "C-13", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К РАВНОВЕСИЮ", "arabic": 4, "roman": "I"}, {"id": "C-14", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К РАВНОВЕСИЮ", "arabic": 4, "roman": "II"}, {"id": "C-15", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К РАВНОВЕСИЮ", "arabic": 4, "roman": "III"}, {"id": "C-16", "plate": "ОТНОШЕНИЯ", "process": "СТРЕМИТЬСЯ К РАВНОВЕСИЮ", "arabic": 4, "roman": "IV"}, {"id": "C-17", "plate": "ОТНОШЕНИЯ", "process": "СОЗДАВАТЬ СИСТЕМЫ", "arabic": 5, "roman": "I"}, {"id": "C-18", "plate": "ОТНОШЕНИЯ", "process": "СОЗДАВАТЬ СИСТЕМЫ", "arabic": 5, "roman": "II"}, {"id": "C-19", "plate": "ОТНОШЕНИЯ", "process": "СОЗДАВАТЬ СИСТЕМЫ", "arabic": 5, "roman": "III"}, {"id": "C-20", "plate": "ОТНОШЕНИЯ", "process": "СОЗДАВАТЬ СИСТЕМЫ", "arabic": 5, "roman": "IV"}, {"id": "C-21", "plate": "ОТНОШЕНИЯ", "process": "ЦЕНИТЬ ЕСТЕСТВЕННОСТЬ", "arabic": 6, "roman": "I"}, {"id": "C-22", "plate": "ОТНОШЕНИЯ", "process": "ЦЕНИТЬ ЕСТЕСТВЕННОСТЬ", "arabic": 6, "roman": "II"}, {"id": "C-23", "plate": "ОТНОШЕНИЯ", "process": "ЦЕНИТЬ ЕСТЕСТВЕННОСТЬ", "arabic": 6, "roman": "III"}, {"id": "C-24", "plate": "ОТНОШЕНИЯ", "process": "ЦЕНИТЬ ЕСТЕСТВЕННОСТЬ", "arabic": 6, "roman": "IV"}, {"id": "O-01", "plate": "РЕЗУЛЬТАТ", "process": "АДАПТИРОВАТЬСЯ К ВЕРОВАНИЯМ", "arabic": 1, "roman": "I"}, {"id": "O-02", "plate": "РЕЗУЛЬТАТ", "process": "АДАПТИРОВАТЬСЯ К ВЕРОВАНИЯМ", "arabic": 1, "roman": "II"}, {"id": "O-03", "plate": "РЕЗУЛЬТАТ", "process": "АДАПТИРОВАТЬСЯ К ВЕРОВАНИЯМ", "arabic": 1, "roman": "III"}, {"id": "O-04", "plate": "РЕЗУЛЬТАТ", "process": "АДАПТИРОВАТЬСЯ К ВЕРОВАНИЯМ", "arabic": 1, "roman": "IV"}, {"id": "O-05", "plate": "РЕЗУЛЬТАТ", "process": "ЖЕРТВОВАТЬ ИНТЕРЕСАМИ", "arabic": 2, "roman": "I"}, {"id": "O-06", "plate": "РЕЗУЛЬТАТ", "process": "ЖЕРТВОВАТЬ ИНТЕРЕСАМИ", "arabic": 2, "roman": "II"}, {"id": "O-07", "plate": "РЕЗУЛЬТАТ", "process": "ЖЕРТВОВАТЬ ИНТЕРЕСАМИ", "arabic": 2, "roman": "III"}, {"id": "O-08", "plate": "РЕЗУЛЬТАТ", "process": "ЖЕРТВОВАТЬ ИНТЕРЕСАМИ", "arabic": 2, "roman": "IV"}, {"id": "O-09", "plate": "РЕЗУЛЬТАТ", "process": "СОБЛЮДАТЬ ДИСЦИПЛИНУ", "arabic": 3, "roman": "I"}, {"id": "O-10", "plate": "РЕЗУЛЬТАТ", "process": "СОБЛЮДАТЬ ДИСЦИПЛИНУ", "arabic": 3, "roman": "II"}, {"id": "O-11", "plate": "РЕЗУЛЬТАТ", "process": "СОБЛЮДАТЬ ДИСЦИПЛИНУ", "arabic": 3, "roman": "III"}, {"id": "O-12", "plate": "РЕЗУЛЬТАТ", "process": "СОБЛЮДАТЬ ДИСЦИПЛИНУ", "arabic": 3, "roman": "IV"}, {"id": "O-13", "plate": "РЕЗУЛЬТАТ", "process": "БЫТЬ В МОДЕЛИ ЦЕЛОГО", "arabic": 4, "roman": "I"}, {"id": "O-14", "plate": "РЕЗУЛЬТАТ", "process": "БЫТЬ В МОДЕЛИ ЦЕЛОГО", "arabic": 4, "roman": "II"}, {"id": "O-15", "plate": "РЕЗУЛЬТАТ", "process": "БЫТЬ В МОДЕЛИ ЦЕЛОГО", "arabic": 4, "roman": "III"}, {"id": "O-16", "plate": "РЕЗУЛЬТАТ", "process": "БЫТЬ В МОДЕЛИ ЦЕЛОГО", "arabic": 4, "roman": "IV"}, {"id": "O-17", "plate": "РЕЗУЛЬТАТ", "process": "СОЕДИНЯТЬ ТОЧКИ", "arabic": 5, "roman": "I"}, {"id": "O-18", "plate": "РЕЗУЛЬТАТ", "process": "СОЕДИНЯТЬ ТОЧКИ", "arabic": 5, "roman": "II"}, {"id": "O-19", "plate": "РЕЗУЛЬТАТ", "process": "СОЕДИНЯТЬ ТОЧКИ", "arabic": 5, "roman": "III"}, {"id": "O-20", "plate": "РЕЗУЛЬТАТ", "process": "СОЕДИНЯТЬ ТОЧКИ", "arabic": 5, "roman": "IV"}, {"id": "O-21", "plate": "РЕЗУЛЬТАТ", "process": "ВОССТАНАВЛИВАТЬ ДУХОВНОСТЬ", "arabic": 6, "roman": "I"}, {"id": "O-22", "plate": "РЕЗУЛЬТАТ", "process": "ВОССТАНАВЛИВАТЬ ДУХОВНОСТЬ", "arabic": 6, "roman": "II"}, {"id": "O-23", "plate": "РЕЗУЛЬТАТ", "process": "ВОССТАНАВЛИВАТЬ ДУХОВНОСТЬ", "arabic": 6, "roman": "III"}, {"id": "O-24", "plate": "РЕЗУЛЬТАТ", "process": "ВОССТАНАВЛИВАТЬ ДУХОВНОСТЬ", "arabic": 6, "roman": "IV"}];
+var AZ = [{"id": "A1", "title": "Азъ (А)"}, {"id": "A2", "title": "Буки (Б)"}, {"id": "A3", "title": "Веди (В)"}, {"id": "A4", "title": "Глаголь (Г)"}, {"id": "A5", "title": "Добро (Д)"}, {"id": "A6", "title": "Есть (Е)"}, {"id": "A7", "title": "Живѣтє (Ж)"}, {"id": "A8", "title": "Зело (З)"}, {"id": "A9", "title": "Земля (Ѕ)"}, {"id": "A10", "title": "Иже (И)"}, {"id": "A11", "title": "И (І)"}, {"id": "A12", "title": "Како (К)"}, {"id": "A13", "title": "Люди (Л)"}, {"id": "A14", "title": "Мыслете (М)"}, {"id": "A15", "title": "Наш (Н)"}, {"id": "A16", "title": "Он (О)"}, {"id": "A17", "title": "Покой (П)"}, {"id": "A18", "title": "Рцы (Р)"}, {"id": "A19", "title": "Слово (С)"}, {"id": "A20", "title": "Твердо (Т)"}];
+var BUKI = [{"id": "B1", "symbol": "⊕", "title": "Суперпозиция"}, {"id": "B2", "symbol": "∅", "title": "Пустота"}, {"id": "B3", "symbol": "τ", "title": "Пластичность времени"}, {"id": "B4", "symbol": "Ψ", "title": "Волновая форма"}, {"id": "B5", "symbol": "C^{⊕}", "title": "⊕-Капитал"}, {"id": "B6", "symbol": "Σ", "title": "Сумма резонансов"}, {"id": "B7", "symbol": "φ", "title": "Фаза пробуждения"}, {"id": "B8", "symbol": "R_f", "title": "Резонанс с будущим"}, {"id": "B9", "symbol": "∇", "title": "Градиент"}, {"id": "B10", "symbol": "I_{Я}", "title": "Интеграция ядра"}, {"id": "B11", "symbol": "⊗", "title": "Точка кристаллизации"}, {"id": "B12", "symbol": "F_s", "title": "Поток смысла"}, {"id": "B13", "symbol": "λ", "title": "Длина волны"}, {"id": "B14", "symbol": "A", "title": "Амплитуда переживания"}, {"id": "B15", "symbol": "∆S", "title": "Изменение смысла"}, {"id": "B16", "symbol": "Q", "title": "Качество отклика"}, {"id": "B17", "symbol": "T", "title": "Текучесть"}, {"id": "B18", "symbol": "S_f", "title": "Структурная форма"}, {"id": "B19", "symbol": "C_m", "title": "Контейнер смыслов"}, {"id": "B20", "symbol": "E^{⊕}", "title": "Энтропическая энергия"}, {"id": "B21", "symbol": "α", "title": "Коэффициент соответствия"}, {"id": "B22", "symbol": "k", "title": "Плотность восприятия"}, {"id": "B23", "symbol": "ω", "title": "Частота обновления"}, {"id": "B24", "symbol": "⊕(Σ)", "title": "Суперпозиция систем"}];
+var TX = [{"id": "TX1", "title": "Ядро"}, {"id": "TX2", "title": "Орбита"}, {"id": "TX3", "title": "Резонанс"}, {"id": "TX4", "title": "Мост"}, {"id": "TX5", "title": "Материализация"}, {"id": "TX6", "title": "Интеграция"}, {"id": "TX7", "title": "Перезапуск"}];
+
+// ===== State =====
+var SEQ = ["РЕСУРС","ВЛАСТЬ","ОТНОШЕНИЯ","РЕЗУЛЬТАТ"];
+var plateIdx = 0;
+var currentCard = null;
+var convo = []; // {role:'ai'|'me', text:string}
+var chosen = { az:null, buka:null, tx:null };
+var needN = 0;
+var namedStates = [];
+
+// ===== Helpers =====
+function shuffle(a){ var r=a.slice(); for(var i=r.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)); var t=r[i]; r[i]=r[j]; r[j]=t;} return r; }
+function addMsg(role, text){
+  convo.push({role:role,text:text});
+  var log = document.getElementById("log");
+  var div = document.createElement("div");
+  div.className = "msg " + (role==='ai'?'ai':'me');
+  div.innerHTML = text.replace(/\n/g,"<br>");
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+function fmtCard(c){ return c.process + " · " + c.roman + " · N=" + c.arabic; }
+function drawCard(){
+  var plate = SEQ[plateIdx];
+  var pool = [];
+  for (var i=0;i<CARDS_96.length;i++){ if (CARDS_96[i].plate===plate) pool.push(CARDS_96[i]); }
+  currentCard = shuffle(pool)[0];
+  needN = currentCard.arabic;
+  namedStates = [];
+  document.getElementById("plate").textContent = plate;
+  document.getElementById("card").textContent = fmtCard(currentCard);
+  chosen.az = null; chosen.buka = null; chosen.tx = null;
+  renderSelections();
+  addMsg('ai', "Плита: <b>"+plate+"</b>. Карта: <b>"+currentCard.process+"</b> (фаза I–IV: <b>"+currentCard.roman+"</b>, состояний: <b>"+needN+"</b>).<br>Назови <b>"+needN+"</b> своих живых состояния — по одному в строке или через запятую. Затем выбери <b>Аз</b>, <b>Буку</b> и <b>Передачу</b> справа. Когда всё готово — скажи: <i>«Готов»</i>.");
+}
+function ensureDrawn(){
+  if (!currentCard){ drawCard(); }
+}
+
+// ===== Right panel =====
+function renderSelections(){
+  var azL = document.getElementById("az-list"), h="";
+  for (var i=0;i<AZ.length;i++){ h += '<button class="btn small" onclick="pickAz(\''+AZ[i].id+'\')">'+AZ[i].title+'</button>'; }
+  azL.innerHTML = h;
+  document.getElementById("az-chosen").textContent = chosen.az ? ("Выбрано: " + chosen.az.title) : "";
+
+  var bL = document.getElementById("buka-list"); h="";
+  for (var j=0;j<BUKI.length;j++){ h += '<button class="btn small" onclick="pickBuka(\''+BUKI[j].id+'\')">'+BUKI[j].symbol+' '+BUKI[j].title+'</button>'; }
+  bL.innerHTML = h;
+  document.getElementById("buka-chosen").textContent = chosen.buka ? ("Выбрано: " + chosen.buka.symbol + " " + chosen.buka.title) : "";
+
+  var tL = document.getElementById("tx-list"); h="";
+  for (var k=0;k<TX.length;k++){
+    var sel = (chosen.tx && chosen.tx.id===TX[k].id) ? ' style="background:rgba(250,204,21,.2)"' : "";
+    h += '<button class="btn small" onclick="pickTx(\''+TX[k].id+'\')"'+sel+'>'+TX[k].title+'</button>';
+  }
+  tL.innerHTML = h;
+  document.getElementById("tx-chosen").textContent = chosen.tx ? ("Выбрано: " + chosen.tx.title) : "";
+}
+function byId(list,id){ for (var i=0;i<list.length;i++){ if(list[i].id===id) return list[i]; } return null; }
+function pickAz(id){ chosen.az = byId(AZ,id); renderSelections(); }
+function pickBuka(id){ chosen.buka = byId(BUKI,id); renderSelections(); }
+function pickTx(id){ chosen.tx = byId(TX,id); renderSelections(); }
+
+// ===== Conversation logic =====
+function handleUser(text){
+  addMsg('me', text);
+  ensureDrawn();
+
+  // Если пользователь перечисляет состояния
+  var list = text.split(/[,
+;]/);
+  var added = 0;
+  for (var i=0;i<list.length;i++){
+    var s = list[i].trim();
+    if (!s) continue;
+    if (namedStates.length < needN){
+      namedStates.push(s);
+      added++;
+    }
+  }
+  if (added>0){
+    addMsg('ai', "Записал состояний: <b>"+namedStates.length+"</b> из <b>"+needN+"</b>.");
+  }
+
+  // Готовность
+  if (/^готов[.!?]*$/i.test(text.trim())){
+    var ok = (namedStates.length===needN && chosen.az && chosen.buka && chosen.tx);
+    if (!ok){
+      var lacks = [];
+      if (namedStates.length!==needN) lacks.push("состояния ("+namedStates.length+"/"+needN+")");
+      if (!chosen.az) lacks.push("Аз");
+      if (!chosen.buka) lacks.push("Бука");
+      if (!chosen.tx) lacks.push("Передача");
+      addMsg('ai', "Ещё не хватает: <b>"+lacks.join(", ")+"</b>.");
+      return;
+    }
+    // Резонансная формула
+    var report = [
+      "Карта: <b>"+currentCard.process+"</b> · фаза <b>"+currentCard.roman+"</b> · N="+needN,
+      "Формула: <b>"+chosen.az.title+"</b> × <b>"+chosen.buka.symbol+" "+chosen.buka.title+"</b> → <b>"+chosen.tx.title+"</b>",
+      "Твои состояния: " + namedStates.map(function(s){return "<span class='chip'>"+s+"</span>";}).join(" ")
+    ].join("<br>");
+    addMsg('ai', report + "<br>Когда будешь готов — нажми «Вытянуть карту», мы пойдём дальше. Если хочешь — можешь проговорить, что поменялось внутри.");
+    // Автоматический переход плиты после 6 карт? В мета-версии оставим ручным по кнопке.
+    return;
+  }
+
+  // Иначе — содержательный отклик
+  var hint = "Двигайся просто: назови ещё состояния или скажи <i>«Готов»</i>.";
+  addMsg('ai', "Слышу тебя. Это отражается в текущем процессе: <b>"+currentCard.process+"</b>. "+hint);
+}
+
+function sendInput(){
+  var el = document.getElementById("inp");
+  var txt = el.value; if (!txt.trim()) return;
+  el.value = "";
+  handleUser(txt);
+}
+
+function exportDialog(){
+  var lines = [];
+  for (var i=0;i<convo.length;i++){
+    lines.push((convo[i].role==='ai'?'AI: ':'Я: ') + convo[i].text.replace(/<[^>]+>/g,''));
+  }
+  var blob = new Blob([lines.join("\n")], {type:'text/plain;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url; a.download = 'gdeya_meta_dialog.txt'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== Wire =====
+function init(){
+  addMsg('ai', "Я с тобой. Когда будешь готов — нажми «Вытянуть карту» или скажи, что откликается.");
+  document.getElementById("send").addEventListener("click", sendInput);
+  document.getElementById("inp").addEventListener("keydown", function(e){ if(e.key==='Enter'){ e.preventDefault(); sendInput(); }});
+  document.getElementById("btn-draw").addEventListener("click", function(){
+    drawCard();
+  });
+  document.getElementById("btn-export").addEventListener("click", exportDialog);
+  // правую панель сразу покажем
+  renderSelections();
+}
+if (document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init); } else { init(); }
+</script>
+</body>
+</html>
