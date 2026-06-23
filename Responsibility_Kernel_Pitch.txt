@@ -1,0 +1,38 @@
+RESPONSIBILITY KERNEL
+for Complex Agent Systems
+
+PROBLEM
+As agent systems grow in complexity, their behavior increasingly depends on external supervision and ad-hoc rules. State transitions become implicit, responsibility is diffused, and safety mechanisms are layered on top rather than embedded. This leads to hidden degradation, non-reproducible behavior, and brittle scaling.
+
+SOLUTION
+We introduce an architectural kernel where admission, measure, and state transitions are enforced at the core logic level. Actions do not automatically result in transitions: each transition must pass an explicit gate. The system does not interpret intent or outcomes — it only allows or blocks progression based on predefined invariants.
+
+WHAT IT IS
+- Kernel-level policy and transition engine
+- Formal gate between action and next state
+- Responsibility embedded into architecture, not behavior
+
+WHAT IT IS NOT
+- AI consciousness or agent personality
+- Moral or evaluative module
+- Rule-based wrapper or post-hoc safety layer
+- Replacement for learning or planning systems
+
+KEY PROPERTIES
+- Autonomous stopping without human intervention
+- Reproducible behavior under scaling
+- Tolerance to noise, asynchronous operation, and operator absence
+- Compatibility with existing agent architectures
+
+APPLICATIONS
+- Complex single- and multi-agent systems
+- Simulation and decision environments
+- Human–machine collaborative systems
+- AI safety and alignment research
+- Foundations for AI operating system kernels
+
+STATUS
+Working core architecture with integrated admission/measure logic and an explicit responsibility model.
+
+VALUE PROPOSITION
+Agent systems that remain coherent without constant supervision, because limits and responsibility are properties of the architecture itself.
