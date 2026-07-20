@@ -1,0 +1,10 @@
+{
+  "name": "architectonica-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check subject_core.js && node --check skela_full_activation.js && node --check governance_core_v1.js && node --check negative_core_v1.js && node --check gdeya_demons_v1.js && node --check gdeya_demons_v1_angelic.js && node --check meta_core_v2.js && npm test",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
