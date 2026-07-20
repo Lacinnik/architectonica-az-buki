@@ -61,7 +61,7 @@ export type MetaDecision = {
 };
 
 export function collectiveMetaCore(field: SharedField): MetaDecision {
-  const subs = field.subject_ids;
+  const subs = [...new Set(field.subject_ids || [])];
   const links = field.trust_links || [];
   const metrics = (field.shared_objects || []).map(o => o.metrics).filter(Boolean);
 
@@ -78,7 +78,7 @@ export function collectiveMetaCore(field: SharedField): MetaDecision {
     Cm: avg("Cm"),
   };
 
-  const linksVerified = subs.every(a =>
+  const linksVerified = subs.length >= 2 && subs.every(a =>
     subs.some(b => b !== a && links.some(l => l.from === a && l.to === b))
   );
 
@@ -88,10 +88,18 @@ export function collectiveMetaCore(field: SharedField): MetaDecision {
     avgMetrics.T >= 0.75 &&
     linksVerified;
 
+  const metricsReady = avgMetrics.alpha >= 0.75 && avgMetrics.Q >= 0.75 && avgMetrics.T >= 0.75;
+  const gate: MetaDecision["gate"] = !linksVerified ? "trust" : !metricsReady ? "metrics" : "ok";
+  const reason = gate === "trust"
+    ? "Не подтверждены взаимные связи доверия"
+    : gate === "metrics"
+      ? "Недостаточная проводимость общего объекта"
+      : "";
+
   return {
     allow: synthesisReady,
-    gate: synthesisReady ? "ok" : "metrics",
-    reason: synthesisReady ? "" : "Недостаточная проводимость или доверие",
+    gate,
+    reason,
     synthesis_ready: synthesisReady,
     avg_metrics: avgMetrics,
     links_verified: linksVerified,

@@ -112,20 +112,20 @@ export function metaCanActivate({
 
   if (req.includes("love_gate") && !gateState?.love?.pass) {
     const reason = gateState?.love?.reason || "love gate failed";
-    makeAttempt({ ts, plate, card, metrics: m, gate: "love", allowed: false, reason });
-    return { allow: false, gate: "love", reason, gateState };
+    const attempt = makeAttempt({ ts, plate, card, metrics: m, gate: "love", allowed: false, reason });
+    return { allow: false, gate: "love", reason, gateState, attempt };
   }
 
   if (req.includes("measure_gate") && !gateState?.measure?.pass) {
     const reason = gateState?.measure?.reason || "measure gate failed";
-    makeAttempt({ ts, plate, card, metrics: m, gate: "measure", allowed: false, reason });
-    return { allow: false, gate: "measure", reason, gateState };
+    const attempt = makeAttempt({ ts, plate, card, metrics: m, gate: "measure", allowed: false, reason });
+    return { allow: false, gate: "measure", reason, gateState, attempt };
   }
 
   // --- УСПЕХ ---
   const gate = req.includes("measure_gate") ? "measure" : "love";
-  makeAttempt({ ts, plate, card, metrics: m, gate, allowed: true, reason: "" });
-  return { allow: true, gate, reason: "", gateState };
+  const attempt = makeAttempt({ ts, plate, card, metrics: m, gate, allowed: true, reason: "" });
+  return { allow: true, gate, reason: "", gateState, attempt };
 }
 
 // -----------------------------
