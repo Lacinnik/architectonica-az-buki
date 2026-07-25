@@ -1,0 +1,11 @@
+{
+  "name": "ГДЕЯ · Ядро субъекта",
+  "short_name": "Ядро субъекта",
+  "description": "Цикл карт, Аз × Буки, TZAR Conductance и локальный дневник.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#070b14"
+}

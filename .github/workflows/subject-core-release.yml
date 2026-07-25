@@ -1,0 +1,42 @@
+name: Subject Core release checks
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/subject-core-release.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "subject-core/**"
+      - "tests/subject-core-release.test.mjs"
+      - "tests/e2e/subject-core-browser.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-contracts:
+    name: Release contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+
+  browser-matrix:
+    name: Chromium desktop and iPhone WebKit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:subject-core:browser
