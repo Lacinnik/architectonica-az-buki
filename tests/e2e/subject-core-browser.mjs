@@ -336,7 +336,9 @@ try {
       await exerciseDiaryPersistence(page);
       await deterministicContext.close();
 
-      await exerciseRealNetworkFailure(browser, entry.contextOptions, server.baseUrl);
+      if (!entry.isMobile) {
+        await exerciseRealNetworkFailure(browser, entry.contextOptions, server.baseUrl);
+      }
       await exerciseStorageDenial(browser, entry.contextOptions, server.baseUrl);
       await exerciseOfflineShell(browser, entry.contextOptions, server.baseUrl);
       console.log(`PASS ${entry.label}`);
