@@ -74,7 +74,7 @@ Service Worker кандидата намеренно:
 | A10 | Локальное хранение | Собрать полную запись, сохранить, перезагрузить | `Дневник (1)` и запись сохраняются; JSON имеет `version: 1` | Chromium + iPhone WebKit; отдельно ручной reload |
 | A11 | Storage denial | Запретить Storage API | Приложение продолжает работать и предлагает экспорт JSON | Chromium + iPhone WebKit |
 | A12 | Service Worker | Дождаться `navigator.serviceWorker.ready`, перезагрузить под controller | Есть cache `subject-core-shell-v1`; app shell открывается | Chromium + iPhone WebKit |
-| A13 | Offline | После controlled reload отключить сеть и перезагрузить | UI открывается; виден offline-статус; Conductance использует fallback без коэффициента | Chromium + iPhone WebKit |
+| A13 | Offline | После controlled reload оборвать origin socket, открыть новую страницу с `navigator.onLine=false` | Навигацию обслуживает app-shell cache; виден offline-статус; Conductance использует fallback без коэффициента | Chromium + iPhone WebKit |
 | A14 | CDN не в offline cache | Проверить Cache Storage после install | URL jsDelivr отсутствует; модель не заявляется доступной офлайн | Chromium + iPhone WebKit |
 | A15 | CSP/CORS | Проверить meta/header policy и реальные CDN preflight/GET | Разрешены только необходимые runtime/model endpoints; default/object ограничены | Статический контракт + ручные HTTP-проверки |
 | A16 | iPhone layout | Открыть как iPhone 13 WebKit, пройти A01–A14 | Нет горизонтального переполнения документа, элементы доступны и кликабельны | GitHub Actions WebKit |

@@ -23,7 +23,12 @@ const contentTypes = {
 };
 
 function serveRelease() {
+  let disconnected = false;
   const server = createServer(async (request, response) => {
+    if (disconnected) {
+      request.socket.destroy();
+      return;
+    }
     try {
       const requestUrl = new URL(request.url ?? "/", "http://127.0.0.1");
       const relativePath = decodeURIComponent(requestUrl.pathname === "/" ? "index.html" : requestUrl.pathname.slice(1));
@@ -54,6 +59,9 @@ function serveRelease() {
         close: () => new Promise((resolveClose, rejectClose) => {
           server.close((error) => error ? rejectClose(error) : resolveClose());
         }),
+        setDisconnected: (value) => {
+          disconnected = value;
+        },
       });
     });
   });
@@ -271,11 +279,11 @@ async function exerciseStorageDenial(browser, contextOptions, baseUrl) {
   }
 }
 
-async function exerciseOfflineShell(browser, contextOptions, baseUrl) {
+async function exerciseOfflineShell(browser, contextOptions, releaseServer) {
   const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
   try {
-    await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    await page.goto(releaseServer.baseUrl, { waitUntil: "domcontentloaded" });
     await page.evaluate(() => navigator.serviceWorker.ready);
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
@@ -289,9 +297,15 @@ async function exerciseOfflineShell(browser, contextOptions, baseUrl) {
     assert.ok(cacheAudit.keys.includes("subject-core-shell-v1"), "app shell cache must be installed");
     assert.equal(cacheAudit.cdnRuntimeCached, false, "service worker must not imply that the CDN model is offline-ready");
 
-    await context.setOffline(true);
+    await context.addInitScript(() => {
+      Object.defineProperty(Navigator.prototype, "onLine", {
+        configurable: true,
+        get: () => false,
+      });
+    });
+    releaseServer.setDisconnected(true);
     const offlinePage = await context.newPage();
-    await offlinePage.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    await offlinePage.goto(releaseServer.baseUrl, { waitUntil: "domcontentloaded" });
     await offlinePage.getByText("ГДЕЯ · ядро субъекта", { exact: true }).waitFor();
     await offlinePage.getByText("Офлайн · структурный контур доступен", { exact: true }).waitFor();
     await choosePlate(offlinePage);
@@ -303,7 +317,7 @@ async function exerciseOfflineShell(browser, contextOptions, baseUrl) {
     ).waitFor();
     await offlinePage.getByText(/Выполнен операционный резервный контур/u).waitFor();
   } finally {
-    await context.setOffline(false).catch(() => {});
+    releaseServer.setDisconnected(false);
     await context.close();
   }
 }
@@ -341,7 +355,7 @@ try {
         await exerciseRealNetworkFailure(browser, entry.contextOptions, server.baseUrl);
       }
       await exerciseStorageDenial(browser, entry.contextOptions, server.baseUrl);
-      await exerciseOfflineShell(browser, entry.contextOptions, server.baseUrl);
+      await exerciseOfflineShell(browser, entry.contextOptions, server);
       console.log(`PASS ${entry.label}`);
     } finally {
       await browser.close();
