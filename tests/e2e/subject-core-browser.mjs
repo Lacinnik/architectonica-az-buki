@@ -185,7 +185,10 @@ async function exerciseConductanceStateMachine(page) {
 
   await page.evaluate(() => window.__setSemanticWorkerMode("error"));
   await run.click();
-  await page.getByText("Модельный слой недоступен", { exact: true }).waitFor();
+  await page.getByText(
+    "Модельный слой недоступен · выполнена точная структурная проверка",
+    { exact: true },
+  ).waitFor();
   await page.getByText(
     "Выполнен операционный резервный контур без вымышленного коэффициента модели. Причина: simulated CDN failure",
     { exact: true },
@@ -234,7 +237,10 @@ async function exerciseRealNetworkFailure(browser, contextOptions, baseUrl) {
     await choosePlate(page);
     await fillConductance(page, "инвариант", "вариант");
     await page.getByRole("button", { name: "Провести через ТзАр", exact: true }).click();
-    await page.getByText("Модельный слой недоступен", { exact: true }).waitFor({ timeout: 15_000 });
+    await page.getByText(
+      "Модельный слой недоступен · выполнена точная структурная проверка",
+      { exact: true },
+    ).waitFor({ timeout: 15_000 });
     await page.getByText(/Выполнен операционный резервный контур/u).waitFor();
   } finally {
     await context.close();
