@@ -290,17 +290,18 @@ async function exerciseOfflineShell(browser, contextOptions, baseUrl) {
     assert.equal(cacheAudit.cdnRuntimeCached, false, "service worker must not imply that the CDN model is offline-ready");
 
     await context.setOffline(true);
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await page.getByText("ГДЕЯ · ядро субъекта", { exact: true }).waitFor();
-    await page.getByText("Офлайн · структурный контур доступен", { exact: true }).waitFor();
-    await choosePlate(page);
-    await fillConductance(page, "инвариант", "вариант");
-    await page.getByRole("button", { name: "Провести через ТзАр", exact: true }).click();
-    await page.getByText(
+    const offlinePage = await context.newPage();
+    await offlinePage.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    await offlinePage.getByText("ГДЕЯ · ядро субъекта", { exact: true }).waitFor();
+    await offlinePage.getByText("Офлайн · структурный контур доступен", { exact: true }).waitFor();
+    await choosePlate(offlinePage);
+    await fillConductance(offlinePage, "инвариант", "вариант");
+    await offlinePage.getByRole("button", { name: "Провести через ТзАр", exact: true }).click();
+    await offlinePage.getByText(
       "Модельный слой недоступен · выполнена точная структурная проверка",
       { exact: true },
     ).waitFor();
-    await page.getByText(/Выполнен операционный резервный контур/u).waitFor();
+    await offlinePage.getByText(/Выполнен операционный резервный контур/u).waitFor();
   } finally {
     await context.setOffline(false).catch(() => {});
     await context.close();
