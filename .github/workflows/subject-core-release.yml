@@ -3,6 +3,7 @@ name: Subject Core release checks
 on:
   pull_request:
     paths:
+      - ".github/workflows/subject-core-pages.yml"
       - ".github/workflows/subject-core-release.yml"
       - "package.json"
       - "package-lock.json"
