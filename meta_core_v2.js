@@ -7,6 +7,7 @@ import { activateSkela } from "./skela_full_activation.js";
 import { evaluateGates, parseMetrics, makeAttempt } from "./gdeya_demons_v1.js";
 import { activateGovernanceCore, GOV_CONTEXT, IMPACT } from "./governance_core_v1.js";
 import { activateNegativeCore } from "./negative_core_v1.js";
+import { compileArchitectonicaLanguage } from "./tzar_language_001.js";
 
 // -----------------------------
 // Фазы и контексты (канон)
@@ -74,6 +75,17 @@ export function metaCanActivate({
   prompt_tokens_hint = 0,
   risk = "low", // low|medium|high|critical
 }) {
+  const withLanguage = result => ({
+    ...result,
+    language: compileArchitectonicaLanguage("meta-core-v2", {
+      object: plate || "неназванная плита",
+      subjectTrace: owner || explicit.subject || "владелец не предъявлен",
+      image: `${result.gate} · ${result.allow ? "допуск" : result.reason}`,
+      targetRelation: "различить право допуска следующего шага",
+      context: `${context} · ${phase} · ${impact}`,
+      observedQ: null,
+    }),
+  });
   // --- NEGATIVE CORE (стоп-режим) ---
   const neg = activateNegativeCore();
   const negRes = neg.shouldHalt({
@@ -84,7 +96,7 @@ export function metaCanActivate({
     prompt_tokens_hint,
   });
   if (negRes.halt) {
-    return { allow: false, gate: "neg", reason: negRes.reason };
+    return withLanguage({ allow: false, gate: "neg", reason: negRes.reason });
   }
 
   // --- GOVERNANCE CORE (право/ответственность) ---
@@ -96,13 +108,13 @@ export function metaCanActivate({
     explicit,
   });
   if (!govRes.allow) {
-    return { allow: false, gate: govRes.gate, reason: govRes.reason };
+    return withLanguage({ allow: false, gate: govRes.gate, reason: govRes.reason });
   }
 
   // --- META (контекст по умолчанию) ---
   const ctx = ctxPolicy(context);
   if (!ctx.allow) {
-    return { allow: false, gate: "meta/context", reason: ctx.reason };
+    return withLanguage({ allow: false, gate: "meta/context", reason: ctx.reason });
   }
 
   // --- DEMONS (метрики и пороги) ---
@@ -113,19 +125,19 @@ export function metaCanActivate({
   if (req.includes("love_gate") && !gateState?.love?.pass) {
     const reason = gateState?.love?.reason || "love gate failed";
     const attempt = makeAttempt({ ts, plate, card, metrics: m, gate: "love", allowed: false, reason });
-    return { allow: false, gate: "love", reason, gateState, attempt };
+    return withLanguage({ allow: false, gate: "love", reason, gateState, attempt });
   }
 
   if (req.includes("measure_gate") && !gateState?.measure?.pass) {
     const reason = gateState?.measure?.reason || "measure gate failed";
     const attempt = makeAttempt({ ts, plate, card, metrics: m, gate: "measure", allowed: false, reason });
-    return { allow: false, gate: "measure", reason, gateState, attempt };
+    return withLanguage({ allow: false, gate: "measure", reason, gateState, attempt });
   }
 
   // --- УСПЕХ ---
   const gate = req.includes("measure_gate") ? "measure" : "love";
   const attempt = makeAttempt({ ts, plate, card, metrics: m, gate, allowed: true, reason: "" });
-  return { allow: true, gate, reason: "", gateState, attempt };
+  return withLanguage({ allow: true, gate, reason: "", gateState, attempt });
 }
 
 // -----------------------------

@@ -17,6 +17,8 @@ test("Subject Core entrypoint declares the offline shell and a bounded CSP", asy
   assert.match(html, /connect-src 'self' https:\/\/cdn\.jsdelivr\.net https:\/\/huggingface\.co/);
   assert.match(html, /rel="manifest" href="\.\/manifest\.webmanifest"/);
   assert.match(html, /src="\.\/assets\/app\.js"/);
+  assert.match(html, /src="\.\/assets\/tzar-language-resonance\.js"/);
+  assert.match(html, /href="\.\/assets\/tzar-language-core\.js"/);
   assert.match(html, /href="\.\/assets\/app\.css"/);
 });
 
@@ -28,10 +30,19 @@ test("manifest and service worker describe an app-shell fallback, not a model ca
   assert.equal(manifest.scope, "./");
   assert.equal(manifest.display, "standalone");
   assert.match(serviceWorker, /subject-core-shell-/);
-  assert.match(serviceWorker, /CACHE_NAME = `\$\{CACHE_PREFIX\}v1`/);
+  assert.match(serviceWorker, /CACHE_NAME = `\$\{CACHE_PREFIX\}v2-tzar-language`/);
   assert.match(serviceWorker, /request\.mode === "navigate"/);
   assert.match(serviceWorker, /url\.origin !== SCOPE_URL\.origin/);
   assert.doesNotMatch(serviceWorker, /jsdelivr|huggingface|MiniLM|model_quantized/i);
+});
+
+test("public Subject Core exposes the shared authorial language contract", async () => {
+  const adapter = await text("assets/tzar-language-resonance.js");
+  const core = await text("assets/tzar-language-core.js");
+  assert.match(adapter, /compileArchitectonicaLanguage/);
+  assert.match(adapter, /profile: "subject-core"/);
+  assert.match(adapter, /Q=null/);
+  assert.match(core, /deterministic-symbolic-compiler-not-a-trained-neural-llm/);
 });
 
 test("release bundle exposes persistence, online-first disclosure, and bounded inference", async () => {

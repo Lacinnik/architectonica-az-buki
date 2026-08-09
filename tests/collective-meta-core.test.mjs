@@ -21,6 +21,10 @@ test("Collective Meta Core allows a mutually trusted conductive field", () => {
   assert.equal(result.allow, true);
   assert.equal(result.gate, "ok");
   assert.equal(result.links_verified, true);
+  assert.equal(result.observed_q, null);
+  assert.equal(result.language.profile, "collective-meta-core");
+  assert.equal(result.language.tensor.Q, null);
+  assert.match(result.language.layers.publicStatement, /^Поле удерживает общий объект/u);
 });
 
 test("Collective Meta Core names the trust gate when a link is absent", () => {
