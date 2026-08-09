@@ -1,6 +1,8 @@
 // Subject Core v1.0.0
 // Pure runtime contract for a subject moving an invariant through transitions.
 
+import { compileArchitectonicaLanguage } from "./tzar_language_001.js";
+
 const METRIC_KEYS = ["alpha", "IY", "Cm", "Q", "T"];
 
 function cleanText(value) {
@@ -73,14 +75,23 @@ export class SubjectCore {
   }
 
   snapshot() {
+    const last = this.transitions.at(-1);
     return Object.freeze({
-      schema: "architectonica.subject-core/1.0.0",
+      schema: "architectonica.subject-core/1.1.0",
       subjectId: this.subjectId,
       state: this.state,
       intent: this.intent,
       invariant: this.invariant,
       context: this.context,
       transitions: this.transitions.map((transition) => ({ ...transition })),
+      language: compileArchitectonicaLanguage("subject-core", {
+        object: this.intent,
+        subjectTrace: this.subjectId,
+        image: last ? `${last.plate} · ${last.axis}` : "переход ещё не предъявлен",
+        targetRelation: `провести намерение, сохраняя инвариант «${this.invariant || "не назван"}»`,
+        context: this.context,
+        observedQ: null,
+      }),
     });
   }
 }

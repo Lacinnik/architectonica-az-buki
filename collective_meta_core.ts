@@ -2,10 +2,13 @@
 // Над-субъектный Meta-движок допуска ⊕-встреч
 // Использует sharedField как вход и выдаёт решение: можно ли переход
 
+import { compileArchitectonicaLanguage } from "./tzar_language_001.js";
+
 export type SubjectID = string;
 
 export type MetricsSet = {
   alpha: number;
+  /** Legacy internal quality hypothesis. This is not observed object return Q. */
   Q: number;
   T: number;
   IY?: number;
@@ -58,6 +61,8 @@ export type MetaDecision = {
   links_verified: boolean;
   subjects: SubjectID[];
   shared_id: string;
+  observed_q: null;
+  language: ReturnType<typeof compileArchitectonicaLanguage>;
 };
 
 export function collectiveMetaCore(field: SharedField): MetaDecision {
@@ -105,5 +110,14 @@ export function collectiveMetaCore(field: SharedField): MetaDecision {
     links_verified: linksVerified,
     subjects: subs,
     shared_id: field.id,
+    observed_q: null,
+    language: compileArchitectonicaLanguage("collective-meta-core", {
+      object: field.meta?.title || field.shared_objects?.[0]?.object || field.id,
+      subjectTrace: subs.join(" · "),
+      image: `${gate} · α=${avgMetrics.alpha.toFixed(2)} · Q-hat=${avgMetrics.Q.toFixed(2)} · T=${avgMetrics.T.toFixed(2)}`,
+      targetRelation: "проверить взаимную предъявленность связей и проводимость общего объекта",
+      context: field.active_phase || field.meta?.geometry || "collective-field",
+      observedQ: null,
+    }),
   };
 }

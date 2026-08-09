@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "subject-core-shell-";
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2-tzar-language`;
 const SCOPE_URL = new URL("./", self.registration.scope);
 const CORE_URLS = [
   SCOPE_URL.href,

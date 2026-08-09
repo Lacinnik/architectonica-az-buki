@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { SubjectCore } from "../subject_core.js";
 import { activateSkela } from "../skela_full_activation.js";
 import { CONTEXT, PHASE, activateMetaCore, metaCanActivate } from "../meta_core_v2.js";
+import { compileArchitectonicaLanguage, PRODUCT_PROFILES, TZAR_LANGUAGE_ID } from "../tzar_language_001.js";
 
 const strong = { alpha: 1, IY: 1, Cm: 1, Q: 1, T: 1 };
 
@@ -14,6 +15,8 @@ test("Subject Core requires intent and invariant and records a transition", () =
   const transition = core.registerTransition({ plate: "РЕСУРС", formula: { az: "Азъ", buka: "Поле", tx: "Импульс" }, metrics: strong, axis: "preserved" });
   assert.equal(transition.metrics.alpha, 1);
   assert.equal(core.complete().state, "completed");
+  assert.equal(core.snapshot().language.profile, "subject-core");
+  assert.equal(core.snapshot().language.tensor.Q, null);
 });
 
 test("Skellu activates a pure Subject Core without React imports", () => {
@@ -35,6 +38,17 @@ test("Meta Core exposes evidence for a successful materialization gate", () => {
   assert.equal(result.gate, "measure");
   assert.equal(result.attempt.allowed, true);
   assert.equal(result.attempt.invariant.measurePassed, null);
+  assert.equal(result.language.profile, "meta-core-v2");
+  assert.equal(result.language.tensor.Q, null);
+});
+
+test("TZAR-LANGUAGE-001 exposes five canonical product profiles and strict observed Q", () => {
+  assert.equal(Object.keys(PRODUCT_PROFILES).length, 5);
+  const output = compileArchitectonicaLanguage("architectonica", { object: "Авторский конструкт", subjectTrace: "автор", image: "форма" });
+  assert.equal(output.modelId, TZAR_LANGUAGE_ID);
+  assert.equal(output.tensor.Q, null);
+  assert.match(output.formula, /×.*→/u);
+  assert.throws(() => compileArchitectonicaLanguage("architectonica", { object: "O", observedQ: 0.75 }), /TZAR_LANGUAGE_Q_MUST_BE_OBSERVED_BINARY/);
 });
 
 test("Meta Core reports the failed metric gate", () => {
