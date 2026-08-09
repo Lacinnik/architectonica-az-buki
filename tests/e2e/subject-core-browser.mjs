@@ -294,7 +294,7 @@ async function exerciseOfflineShell(browser, contextOptions, releaseServer) {
         "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.0.1",
       )),
     }));
-    assert.ok(cacheAudit.keys.includes("subject-core-shell-v1"), "app shell cache must be installed");
+    assert.ok(cacheAudit.keys.includes("subject-core-shell-v2-tzar-language"), "app shell cache must be installed");
     assert.equal(cacheAudit.cdnRuntimeCached, false, "service worker must not imply that the CDN model is offline-ready");
 
     await context.addInitScript(() => {
