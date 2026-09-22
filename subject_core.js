@@ -1,4 +1,4 @@
-// Subject Core v1.0.0
+// Subject Core v1.0.1
 // Pure runtime contract for a subject moving an invariant through transitions.
 
 import { compileArchitectonicaLanguage } from "./tzar_language_001.js";
@@ -10,13 +10,16 @@ function cleanText(value) {
 }
 
 function normalizeMetric(value) {
-  const number = Number(String(value ?? "").replace(",", "."));
+  if (typeof value !== "number" && typeof value !== "string") return null;
+  const text = String(value).trim();
+  if (!text) return null;
+  const number = Number(text.replace(",", "."));
   if (!Number.isFinite(number)) return null;
   return Math.max(0, Math.min(1, number));
 }
 
 function normalizeMetrics(metrics = {}) {
-  return Object.fromEntries(METRIC_KEYS.map((key) => [key, normalizeMetric(metrics[key])]));
+  return Object.fromEntries(METRIC_KEYS.map((key) => [key, normalizeMetric(metrics?.[key])]));
 }
 
 export class SubjectCore {
