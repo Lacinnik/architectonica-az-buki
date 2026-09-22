@@ -27,6 +27,11 @@ JSX-файл — **операционная система сознания дл
 
 ---
 
+## Паспорта реализаций
+
+[Subject Core: runtime, браузерный интерфейс и правила обмена](SUBJECT_CORE_PASSPORTS.md).
+
 ## Запуск
 ```jsx
 <Architectonica />
+
