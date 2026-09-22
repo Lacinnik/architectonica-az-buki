@@ -1,0 +1,28 @@
+name: Runtime contracts
+on:
+  pull_request:
+    paths:
+      - "*.js"
+      - "*.ts"
+      - "tests/*.test.mjs"
+      - "package.json"
+      - ".github/workflows/runtime-checks.yml"
+  push:
+    branches: [main]
+    paths:
+      - "*.js"
+      - "*.ts"
+      - "tests/*.test.mjs"
+      - "package.json"
+      - ".github/workflows/runtime-checks.yml"
+permissions:
+  contents: read
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm run check
