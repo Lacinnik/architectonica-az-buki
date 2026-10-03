@@ -4,6 +4,17 @@
 
 ---
 
+## Экосистема Архитектоники
+
+**Единая точка входа:** [Platform 2.0](https://lacinnik.github.io/Game-GDEYA/platform/) — карта всех продуктов, их статусов и связей.
+
+| Репозиторий | Роль | Публичный вход |
+|---|---|---|
+| [architectonica-az-buki](https://github.com/Lacinnik/architectonica-az-buki) | первоисточник: корпус текстов и исходные ядра (Subject Core, Meta Core) | — |
+| [-tensor-architectonics](https://github.com/Lacinnik/-tensor-architectonics) | научный канон ТзАр и TZAR Conductance | [открыть](https://lacinnik.github.io/-tensor-architectonics/) |
+| [reason-](https://github.com/Lacinnik/reason-) | лаборатория РЕЗОН: переводчик, Field Check, 7 Передач, игра «ОСЬ» | [открыть](https://lacinnik.github.io/reason-/) |
+| [Game-GDEYA](https://github.com/Lacinnik/Game-GDEYA) | игра «Ядро субъекта» и Platform 2.0 | [открыть](https://lacinnik.github.io/Game-GDEYA/) |
+
 ## Автор
 **© 2025 [Lacinnik]**  
 Все права защищены по лицензии MIT.
