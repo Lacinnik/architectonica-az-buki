@@ -12,7 +12,7 @@ OUT = ROOT / "md"
 
 
 def placeholder(image):
-    return {"src": "", "alt": "[изображение из исходного .docx]"}
+    return {"src": "", "alt": "изображение из исходного .docx"}
 
 
 def convert(path):
@@ -20,7 +20,8 @@ def convert(path):
         result = mammoth.convert_to_markdown(source, convert_image=mammoth.images.img_element(placeholder))
     text = re.sub(r"\\([.()!])", r"\1", result.value)
     text = re.sub(r"(?<!^)(?<!\n)\\-", "-", text)
-    text = re.sub(r"!\[([^\]]*)\]\(\)", r"*\1*", text)
+    text = re.sub(r"!\[([^\]]*)\]\(\)", r"*(\1)*", text)
+    text = re.sub(r"(?<!!)\[([^\]]*)\]\(\)", r"\1", text)
     return f"<!-- Сгенерировано автоматически из «{path.name}». Источник истины — исходный .docx. -->\n\n{text.strip()}\n"
 
 
