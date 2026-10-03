@@ -20,6 +20,8 @@
 
 Статусы продуктов этого репозитория в общем формате — в [`ecosystem.status.json`](ecosystem.status.json).
 
+Тексты корпуса (`.docx`) доступны для чтения на GitHub в Markdown: [`md/`](md/README.md).
+
 ## Автор
 **© 2025 [Lacinnik]**  
 Все права защищены по лицензии MIT.
