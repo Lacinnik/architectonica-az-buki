@@ -11,6 +11,10 @@ The source repository of the Architectonics ecosystem: the author's text corpus 
 - **⊕** — the point of resonance;
 - **7 Transmissions** — the path from impulse to action.
 
+## Layout
+
+Texts live in [`docs/`](docs/README.md) (readable Markdown copies in [`md/`](md/README.md)), early interfaces in [`prototypes/`](prototypes/README.md), images in [`assets/`](assets/README.md), packed material in [`archive/`](archive/README.md). The tested cores stay in the repository root.
+
 ## Code
 
 | File | What it is |
