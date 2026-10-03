@@ -1,0 +1,27 @@
+{
+  "schema": "lacinnik.ecosystem-status/1.0.0",
+  "repository": "Lacinnik/architectonica-az-buki",
+  "role": "Первоисточник: корпус и исходные ядра",
+  "products": [
+    {
+      "id": "subject-core",
+      "name": "Subject Core",
+      "version": "1.0.1",
+      "status": "embedded",
+      "detail": "встроено в ГДЕЯ; канонический статус не присваивается",
+      "source": "SUBJECT_CORE_PASSPORTS.md"
+    },
+    {
+      "id": "meta-core-v2",
+      "name": "Meta Core v2",
+      "status": "prototype",
+      "source": "meta_core_v2.js"
+    },
+    {
+      "id": "demons-guardians",
+      "name": "ГДЕЯ Demons / Guardians",
+      "status": "prototype",
+      "source": "gdeya_demons_v1.js"
+    }
+  ]
+}
