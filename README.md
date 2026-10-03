@@ -20,7 +20,16 @@
 
 Статусы продуктов этого репозитория в общем формате — в [`ecosystem.status.json`](ecosystem.status.json).
 
-Тексты корпуса (`.docx`) доступны для чтения на GitHub в Markdown: [`md/`](md/README.md).
+## Структура
+
+| Папка | Содержимое |
+|---|---|
+| корень | проверяемые JS-ядра, `subject-core/`, тесты, паспорта и описания |
+| [`docs/`](docs/README.md) | тексты корпуса: `.docx`, `.txt`, `.pdf` |
+| [`md/`](md/README.md) | Markdown-версии `.docx` для чтения на GitHub |
+| [`prototypes/`](prototypes/README.md) | ранние интерфейсы и модули (`.jsx`, `.ts`, `.html`) |
+| [`assets/`](assets/README.md) | изображения и плакаты Аз 1–49 |
+| [`archive/`](archive/README.md) | упакованные материалы и копии для истории |
 
 ## Автор
 **© 2025 [Lacinnik]**  

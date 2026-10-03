@@ -1,6 +1,6 @@
 # architectonica-az-buki · корпус и исходные ядра
 
-Первоисточник экосистемы: тексты автора (`.docx`, `.txt`, `.pdf` в корне) и JS-ядра (`subject_core.js`, `meta_core_v2.js`, `governance_core_v1.js`, `negative_core_v1.js`, `skela_full_activation.js`, `gdeya_demons_v1*.js`, `tzar_language_001.js`, `collective_meta_core.ts`). `subject-core/` — браузерный интерфейс Subject Core, публикуется workflow `subject-core-pages.yml`.
+Первоисточник экосистемы: тексты автора (`docs/`: `.docx`, `.txt`, `.pdf`) и JS-ядра в корне (`subject_core.js`, `meta_core_v2.js`, `governance_core_v1.js`, `negative_core_v1.js`, `skela_full_activation.js`, `gdeya_demons_v1*.js`, `tzar_language_001.js`, `collective_meta_core.ts`). `subject-core/` — браузерный интерфейс Subject Core, публикуется workflow `subject-core-pages.yml`. Ранние интерфейсы — `prototypes/`, изображения — `assets/`, архивы — `archive/`.
 
 ## Перед отправкой
 
@@ -12,7 +12,8 @@ npm run test:subject-core:browser  # при изменениях subject-core/ (
 ## Ловушки
 
 - **Не переносить и не переименовывать ядра в корне**: `Game-GDEYA` копирует их по этим путям (`vendor.lock.json`). После изменения ядра в `Game-GDEYA` нужно выполнить `npm run vendor:update`.
-- **Тексты автора не удалять и не переписывать.** Markdown-копии в `md/` генерируются: после изменения `.docx` — `pip install mammoth && python3 tools/docx_to_md.py`. Источник истины — `.docx`.
+- **Новые тексты класть в `docs/`, прототипы — в `prototypes/`.** Корень — только для проверяемого кода и описаний.
+- **Тексты автора не удалять и не переписывать.** Markdown-копии в `md/` генерируются: после изменения `.docx` в `docs/` — `pip install mammoth && python3 tools/docx_to_md.py`. Источник истины — `.docx`.
 - **Subject Core**: формат дневника `gdeya.subject-core.diary.v1`; при изменении `subject-core/` сменить `CACHE_NAME` в `subject-core/sw.js`. Паспорта контрактов — `SUBJECT_CORE_PASSPORTS.md`.
 - Workflow `runtime-checks.yml` запускается только при изменении `*.js`, `*.ts`, тестов и `package.json`.
 

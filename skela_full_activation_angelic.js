@@ -2,7 +2,7 @@
 // Полная активация с ядром субъекта и демонами
 // Последнее обновление: 2025-12-27
 
-import { SubjectCore } from './gdeya_react_ядро_субъекта.jsx';
+import { SubjectCore } from './prototypes/gdeya_react_ядро_субъекта.jsx';
 import { GATE_THRESH, ANGELIC_THRESH, evaluateAngelicPreflight, evaluateGates, parseMetrics } from './gdeya_demons_v1_angelic.js';
 
 export const activateSkela = () => {

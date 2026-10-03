@@ -8,6 +8,7 @@ from urllib.parse import quote
 import mammoth
 
 ROOT = Path(__file__).resolve().parent.parent
+DOCS = ROOT / "docs"
 OUT = ROOT / "md"
 
 
@@ -28,20 +29,20 @@ def convert(path):
 def main():
     OUT.mkdir(exist_ok=True)
     rows = []
-    for path in sorted(ROOT.glob("*.docx")):
+    for path in sorted(DOCS.glob("*.docx")):
         (OUT / f"{path.stem}.md").write_text(convert(path), encoding="utf-8")
         rows.append(path)
     index = [
         "# Тексты корпуса в Markdown",
         "",
-        "Автоматические Markdown-версии документов `.docx` из корня репозитория: их можно читать прямо на GitHub, "
+        "Автоматические Markdown-версии документов `.docx` из папки [`docs/`](../docs/): их можно читать прямо на GitHub, "
         "искать по ним и видеть правки в истории. Источник истины — исходные `.docx`; после их изменения версии "
         "пересобираются командой `python3 tools/docx_to_md.py`.",
         "",
         "| Документ | Markdown |",
         "|---|---|",
     ]
-    index += [f"| {path.name} | [{path.stem}.md]({quote(path.stem)}.md) |" for path in rows]
+    index += [f"| [{path.name}](../docs/{quote(path.name)}) | [{path.stem}.md]({quote(path.stem)}.md) |" for path in rows]
     (OUT / "README.md").write_text("\n".join(index) + "\n", encoding="utf-8")
     print(f"{len(rows)} documents converted")
 
