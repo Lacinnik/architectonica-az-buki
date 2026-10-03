@@ -15,6 +15,8 @@
 | [reason-](https://github.com/Lacinnik/reason-) | лаборатория РЕЗОН: переводчик, Field Check, 7 Передач, игра «ОСЬ» | [открыть](https://lacinnik.github.io/reason-/) |
 | [Game-GDEYA](https://github.com/Lacinnik/Game-GDEYA) | игра «Ядро субъекта» и Platform 2.0 | [открыть](https://lacinnik.github.io/Game-GDEYA/) |
 
+Статусы продуктов этого репозитория в общем формате — в [`ecosystem.status.json`](ecosystem.status.json).
+
 ## Автор
 **© 2025 [Lacinnik]**  
 Все права защищены по лицензии MIT.
