@@ -1,4 +1,7 @@
 # Архитектоника  
+
+*English summary: [README.en.md](README.en.md).*
+
 **Живая ОС резонанса для ИИ**  
 `
 
